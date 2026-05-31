@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AutoParts — Panel de Licencias</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D0F12;--s1:#13161A;--s2:#1A1D22;--s3:#22262D;--s4:#2C3038;
+  --gold:#C8A96E;--gold-dim:rgba(200,169,110,.12);
+  --green:#3DBFA0;--green-dim:rgba(61,191,160,.1);
+  --red:#E55347;--amber:#E2A84B;
+  --text:#EEF0F3;--t2:#C4C8D0;--t3:#828899;--t4:#50555F;
+  --bdr:#1E2228;--bdr2:#272C35;--bdr3:#333945;
+  --font-d:'Syne',sans-serif;--font-m:'DM Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-m);font-size:13px;min-height:100vh;-webkit-tap-highlight-color:transparent}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ── AUTH GATE ── */
+#auth-gate{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px}
+#auth-gate.gone{display:none}
+.auth-box{background:var(--s1);border:1px solid var(--bdr2);border-radius:14px;padding:32px 24px;max-width:320px;width:100%;text-align:center;animation:fadeUp .3s ease;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.auth-title{font-family:var(--font-d);font-size:20px;font-weight:800;margin-bottom:4px}
+.auth-sub{font-size:11px;color:var(--t4);margin-bottom:20px;letter-spacing:.5px}
+.auth-inp{width:100%;background:var(--bg);border:1px solid var(--bdr2);color:var(--text);padding:11px 13px;border-radius:9px;font-size:13px;font-family:var(--font-m);outline:none;margin-bottom:10px;text-align:center;letter-spacing:2px}
+.auth-inp:focus{border-color:rgba(200,169,110,.4)}
+.auth-btn{width:100%;padding:12px;background:var(--gold);color:#0D0F12;border:none;border-radius:9px;font-family:var(--font-d);font-weight:700;font-size:14px;cursor:pointer}
+.auth-btn:active{background:#B89660}
+.auth-err{font-size:11px;color:var(--red);min-height:16px;margin-bottom:6px}
+
+/* ── MAIN ── */
+#app{display:none;max-width:680px;margin:0 auto;padding:20px 16px 60px}
+#app.on{display:block}
+.page-hdr{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--bdr2)}
+.page-logo{width:38px;height:38px;background:var(--s3);border:1px solid rgba(200,169,110,.25);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.page-logo svg{width:20px;height:20px;fill:var(--gold)}
+.page-title{font-family:var(--font-d);font-size:18px;font-weight:800;letter-spacing:-.3px}
+.page-sub{font-size:10px;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-top:1px}
+.logout-btn{margin-left:auto;background:transparent;border:1px solid var(--bdr2);color:var(--t4);padding:6px 11px;border-radius:7px;font-size:10px;font-family:var(--font-m);cursor:pointer;letter-spacing:.3px}
+.logout-btn:hover{border-color:var(--bdr3);color:var(--t3)}
+
+/* ── SECRET NOTICE ── */
+.secret-notice{background:var(--s2);border:1px solid rgba(200,169,110,.2);border-radius:9px;padding:12px 14px;margin-bottom:20px;font-size:11px;color:var(--t3);line-height:1.6}
+.secret-notice strong{color:var(--gold)}
+.secret-val{font-family:var(--font-m);background:var(--bg);border:1px solid var(--bdr2);border-radius:5px;padding:3px 8px;color:var(--text);font-size:11px;letter-spacing:.5px;display:inline-block;margin-top:2px}
+
+/* ── GENERATOR CARD ── */
+.gen-card{background:var(--s1);border:1px solid var(--bdr2);border-radius:12px;padding:20px;margin-bottom:16px}
+.card-title{font-family:var(--font-d);font-size:14px;font-weight:700;margin-bottom:16px;color:var(--t2);letter-spacing:-.2px}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field.full{grid-column:1/-1}
+.field-label{font-size:9px;font-weight:500;color:var(--t4);letter-spacing:1.2px;text-transform:uppercase}
+.field-inp{background:var(--bg);border:1px solid var(--bdr2);color:var(--text);padding:9px 11px;border-radius:7px;font-size:12px;font-family:var(--font-m);outline:none;width:100%;transition:border-color .15s}
+.field-inp:focus{border-color:rgba(200,169,110,.35)}
+.field-inp::placeholder{color:var(--t4)}
+.gen-btn{width:100%;padding:12px;background:var(--gold);color:#0D0F12;border:none;border-radius:8px;font-family:var(--font-d);font-weight:700;font-size:14px;letter-spacing:.3px;cursor:pointer;transition:all .15s}
+.gen-btn:hover{background:#D4B47A}
+.gen-btn:active{background:#B89660}
+
+/* ── RESULT ── */
+.result-box{display:none;background:var(--bg);border:1px solid rgba(200,169,110,.3);border-radius:9px;padding:16px;margin-top:14px}
+.result-box.on{display:block;animation:fadeUp .2s ease}
+.result-label{font-size:9px;color:var(--t4);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px}
+.result-code{
+  font-family:var(--font-m);font-size:22px;font-weight:500;
+  color:var(--gold);letter-spacing:3px;text-align:center;
+  padding:14px;background:var(--s2);border-radius:7px;
+  border:1px solid rgba(200,169,110,.15);
+  cursor:pointer;user-select:all;margin-bottom:10px;
+  transition:background .15s;
+}
+.result-code:active{background:var(--s3)}
+.result-meta{font-size:11px;color:var(--t3);text-align:center;margin-bottom:12px;line-height:1.6}
+.copy-btn{width:100%;padding:10px;background:var(--s3);border:1px solid var(--bdr3);color:var(--t2);border-radius:7px;font-family:var(--font-m);font-size:12px;cursor:pointer;transition:all .15s;letter-spacing:.3px}
+.copy-btn:active{background:var(--s4)}
+.copy-btn.copied{background:var(--green-dim);border-color:rgba(61,191,160,.3);color:var(--green)}
+
+/* ── HISTORY ── */
+.history-card{background:var(--s1);border:1px solid var(--bdr2);border-radius:12px;padding:20px}
+.hist-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.hist-list{display:flex;flex-direction:column;gap:6px}
+.hist-item{background:var(--bg);border:1px solid var(--bdr2);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;animation:fadeUp .2s ease}
+.hist-item:hover{border-color:var(--bdr3)}
+.hist-code{font-family:var(--font-m);font-size:12px;color:var(--gold);letter-spacing:1.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-meta{font-size:10px;color:var(--t4);text-align:right;flex-shrink:0}
+.hist-name{font-size:10px;color:var(--t3)}
+.hist-copy{background:var(--s2);border:1px solid var(--bdr2);color:var(--t3);padding:4px 9px;border-radius:5px;font-size:10px;cursor:pointer;flex-shrink:0;font-family:var(--font-m);transition:all .15s}
+.hist-copy:active{background:var(--s4)}
+.hist-expired{opacity:.4}
+.hist-badge{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:500;letter-spacing:.3px;flex-shrink:0}
+.hist-badge.active{background:var(--green-dim);color:var(--green)}
+.hist-badge.exp{background:rgba(192,57,43,.1);color:var(--red)}
+.clear-btn{background:transparent;border:1px solid var(--bdr2);color:var(--t4);padding:5px 10px;border-radius:6px;font-size:10px;cursor:pointer;font-family:var(--font-m)}
+.clear-btn:hover{border-color:var(--red);color:var(--red)}
+.empty-hist{font-size:12px;color:var(--t4);text-align:center;padding:20px;letter-spacing:.3px}
+</style>
+</head>
+<body>
+
+<!-- AUTH GATE -->
+<div id="auth-gate">
+  <div class="auth-box">
+    <div style="font-size:32px;margin-bottom:12px">🔐</div>
+    <div class="auth-title">Panel Privado</div>
+    <div class="auth-sub">AutoParts · Generador de licencias</div>
+    <input class="auth-inp" id="auth-inp" type="password" placeholder="Contraseña" autocomplete="off"/>
+    <div class="auth-err" id="auth-err"></div>
+    <button class="auth-btn" onclick="checkAuth()">Ingresar</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="page-hdr">
+    <div class="page-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </div>
+    <div>
+      <div class="page-title">Panel de Licencias</div>
+      <div class="page-sub">AutoParts Pro</div>
+    </div>
+    <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+  </div>
+
+  <!-- SECRET NOTICE -->
+  <div class="secret-notice">
+    ⚠ <strong>IMPORTANTE:</strong> La clave secreta de este generador debe ser idéntica a la del archivo de la app (<code>LICENSE_SECRET</code>).<br>
+    Clave actual: <span class="secret-val" id="secret-display"></span>
+  </div>
+
+  <!-- GENERATOR -->
+  <div class="gen-card">
+    <div class="card-title">Generar código de licencia</div>
+    <div class="field-grid">
+      <div class="field">
+        <div class="field-label">ID Cliente</div>
+        <input class="field-inp" id="g-client" placeholder="C001" maxlength="4" style="text-transform:uppercase"/>
+      </div>
+      <div class="field">
+        <div class="field-label">Nombre (opcional)</div>
+        <input class="field-inp" id="g-name" placeholder="Ej: Repuestos San Martín"/>
+      </div>
+      <div class="field">
+        <div class="field-label">Mes</div>
+        <select class="field-inp" id="g-month">
+          <option value="1">Enero</option><option value="2">Febrero</option>
+          <option value="3">Marzo</option><option value="4">Abril</option>
+          <option value="5">Mayo</option><option value="6">Junio</option>
+          <option value="7">Julio</option><option value="8">Agosto</option>
+          <option value="9">Septiembre</option><option value="10">Octubre</option>
+          <option value="11">Noviembre</option><option value="12">Diciembre</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="field-label">Año</div>
+        <select class="field-inp" id="g-year"></select>
+      </div>
+    </div>
+    <button class="gen-btn" onclick="generateCode()">⚡ Generar código</button>
+
+    <div class="result-box" id="result-box">
+      <div class="result-label">Código generado — tocá para seleccionar</div>
+      <div class="result-code" id="result-code" onclick="copyCode(this.textContent)"></div>
+      <div class="result-meta" id="result-meta"></div>
+      <button class="copy-btn" id="copy-btn" onclick="copyCode(document.getElementById('result-code').textContent)">
+        📋 Copiar código
+      </button>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="history-card">
+    <div class="hist-hdr">
+      <div class="card-title" style="margin-bottom:0">Historial de códigos generados</div>
+      <button class="clear-btn" onclick="clearHistory()">Limpiar</button>
+    </div>
+    <div class="hist-list" id="hist-list">
+      <div class="empty-hist">Aún no generaste ningún código</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIG — debe coincidir con LICENSE_SECRET en autoparts-pro.html
+// ══════════════════════════════════════════════
+const LICENSE_SECRET = "PaolaDesarm_2026_X9k7mQr4";
+// ⚠ Si cambiás esta clave, cambiala también en la app principal.
+
+// Panel password (cambiala por una propia)
+const PANEL_PASSWORD = "autoparts2026";
+
+// ══════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════
+function checkAuth() {
+  const val = document.getElementById('auth-inp').value;
+  const err = document.getElementById('auth-err');
+  if (val === PANEL_PASSWORD) {
+    localStorage.setItem('ap_gen_auth', btoa(PANEL_PASSWORD));
+    document.getElementById('auth-gate').classList.add('gone');
+    document.getElementById('app').classList.add('on');
+    initApp();
+  } else {
+    err.textContent = 'Contraseña incorrecta';
+    document.getElementById('auth-inp').value = '';
+    document.getElementById('auth-inp').style.borderColor = '#E55347';
+    setTimeout(() => { document.getElementById('auth-inp').style.borderColor = ''; }, 1500);
+  }
+}
+document.getElementById('auth-inp').addEventListener('keydown', e => { if (e.key === 'Enter') checkAuth(); });
+
+function logout() {
+  localStorage.removeItem('ap_gen_auth');
+  location.reload();
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('ap_gen_auth');
+  if (saved === btoa(PANEL_PASSWORD)) {
+    document.getElementById('auth-gate').classList.add('gone');
+    document.getElementById('app').classList.add('on');
+    initApp();
+  }
+});
+
+function initApp() {
+  document.getElementById('secret-display').textContent = LICENSE_SECRET;
+  // Set current month/year as default
+  const now = new Date();
+  const mSel = document.getElementById('g-month');
+  const ySel = document.getElementById('g-year');
+  mSel.value = now.getMonth() + 1;
+  for (let y = now.getFullYear(); y <= now.getFullYear() + 2; y++) {
+    const o = document.createElement('option');
+    o.value = y; o.textContent = y;
+    if (y === now.getFullYear()) o.selected = true;
+    ySel.appendChild(o);
+  }
+  renderHistory();
+}
+
+// ══════════════════════════════════════════════
+// HASH (must match the app)
+// ══════════════════════════════════════════════
+async function licHash(clientId, month, year2d) {
+  const raw = `${LICENSE_SECRET}|${clientId}|${String(month).padStart(2,'0')}|${String(year2d).padStart(2,'0')}`;
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('').toUpperCase().slice(0, 8);
+}
+
+// ══════════════════════════════════════════════
+// GENERATE
+// ══════════════════════════════════════════════
+async function generateCode() {
+  const clientId = document.getElementById('g-client').value.trim().toUpperCase().slice(0,4);
+  const name     = document.getElementById('g-name').value.trim();
+  const month    = parseInt(document.getElementById('g-month').value);
+  const year     = parseInt(document.getElementById('g-year').value);
+
+  if (!clientId || clientId.length < 2) {
+    alert('El ID de cliente debe tener entre 2 y 4 caracteres (ej: C001, SHOP, AUTO)');
+    return;
+  }
+
+  const year2d = year % 100;
+  const mm = String(month).padStart(2,'0');
+  const yy = String(year2d).padStart(2,'0');
+  const hash = await licHash(clientId, month, year2d);
+  const code = `AP-${clientId}-${mm}${yy}-${hash}`;
+
+  // Show result
+  document.getElementById('result-code').textContent = code;
+  const expiry = new Date(year, month, 0);
+  const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('result-meta').innerHTML =
+    `Cliente: <strong>${clientId}</strong>${name ? ' · ' + name : ''}<br>Válido hasta el <strong>${expiry.getDate()} de ${months[month-1]} de ${year}</strong>`;
+  document.getElementById('result-box').classList.add('on');
+  document.getElementById('copy-btn').textContent = '📋 Copiar código';
+  document.getElementById('copy-btn').className = 'copy-btn';
+
+  // Save to history
+  const hist = loadHistory();
+  hist.unshift({ code, clientId, name, month, year, generatedAt: Date.now() });
+  saveHistory(hist.slice(0, 100)); // keep last 100
+  renderHistory();
+}
+
+// ══════════════════════════════════════════════
+// COPY
+// ══════════════════════════════════════════════
+async function copyCode(code) {
+  try {
+    await navigator.clipboard.writeText(code);
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ Copiado!';
+    btn.className = 'copy-btn copied';
+    setTimeout(() => { btn.textContent = '📋 Copiar código'; btn.className = 'copy-btn'; }, 2000);
+  } catch(_) {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = code; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ Copiado!'; btn.className = 'copy-btn copied';
+    setTimeout(() => { btn.textContent = '📋 Copiar código'; btn.className = 'copy-btn'; }, 2000);
+  }
+}
+
+// ══════════════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════════════
+function loadHistory() { try { return JSON.parse(localStorage.getItem('ap_gen_hist') || '[]'); } catch(_) { return []; } }
+function saveHistory(h) { localStorage.setItem('ap_gen_hist', JSON.stringify(h)); }
+
+function renderHistory() {
+  const list = document.getElementById('hist-list');
+  const hist = loadHistory();
+  if (!hist.length) { list.innerHTML = '<div class="empty-hist">Aún no generaste ningún código</div>'; return; }
+  const now = new Date();
+  const currVal = now.getFullYear() * 12 + now.getMonth() + 1;
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  list.innerHTML = hist.map((h, i) => {
+    const codeVal = h.year * 12 + h.month;
+    const isActive = codeVal >= currVal;
+    const badge = isActive
+      ? '<span class="hist-badge active">Activo</span>'
+      : '<span class="hist-badge exp">Vencido</span>';
+    const date = new Date(h.generatedAt).toLocaleDateString('es-CL', { day:'numeric', month:'short' });
+    return `<div class="hist-item${isActive?'':' hist-expired'}">
+      <div style="flex:1;min-width:0">
+        <div class="hist-code">${h.code}</div>
+        <div class="hist-name">${h.clientId}${h.name?' · '+h.name:''} · ${months[h.month-1]} ${h.year}</div>
+      </div>
+      ${badge}
+      <div class="hist-meta">Creado ${date}</div>
+      <button class="hist-copy" onclick="copyToClip('${h.code}',this)">Copiar</button>
+    </div>`;
+  }).join('');
+}
+
+async function copyToClip(text, btn) {
+  try { await navigator.clipboard.writeText(text); }
+  catch(_) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+  const orig = btn.textContent;
+  btn.textContent = '✓'; btn.style.color = 'var(--green)';
+  setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1500);
+}
+
+function clearHistory() {
+  if (!confirm('¿Eliminar todo el historial de códigos?')) return;
+  saveHistory([]);
+  renderHistory();
+}
+</script>
+</body>
+</html>
