@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
+<title>Panel — Desarmaduria Paola</title>
+<meta name="theme-color" content="#0D0F12"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Panel — Desarmaduria Paola"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D0F12;--s1:#13161A;--s2:#1A1D22;--s3:#22262D;--s4:#2C3038;
+  --gold:#C8A96E;--gold-dim:rgba(200,169,110,.12);--gold-glow:rgba(200,169,110,.25);
+  --green:#2A9D6F;--green-lt:#3DBFA0;--green-dim:rgba(42,157,111,.12);
+  --sold:#3C4250;--sold-lt:#6B7280;
+  --red:#C0392B;--red-lt:#E55347;--amber:#C08A2E;--amber-lt:#E2A84B;
+  --text:#EEF0F3;--t2:#C4C8D0;--t3:#828899;--t4:#50555F;--t5:#30343B;
+  --bdr:#1E2228;--bdr2:#272C35;--bdr3:#333945;
+  --r4:4px;--r6:6px;--r8:8px;--r10:10px;--r12:12px;--r16:16px;
+  --font-display:'Syne',sans-serif;--font-mono:'DM Mono',monospace;
+}
+html{background:var(--bg)}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--font-mono);
+  font-size:13px;font-weight:400;min-height:100vh;
+  -webkit-tap-highlight-color:transparent;
+  padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
+}
+::-webkit-scrollbar{width:2px;height:2px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s4);border-radius:2px}
+button{font-family:var(--font-mono);cursor:pointer;border:none;outline:none}
+input,select,textarea{font-family:var(--font-mono);outline:none}
+a{color:var(--gold)}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse-gold{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ── Password Gate ── */
+#pw-gate{position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+#pw-gate.gone{display:none}
+.pw-box{background:var(--s1);border:1px solid var(--bdr2);border-radius:var(--r16);padding:36px 28px 28px;max-width:340px;width:100%;text-align:center;animation:fadeUp .35s ease}
+.pw-icon{font-size:36px;margin-bottom:12px;opacity:.6}
+.pw-title{font-family:var(--font-display);font-size:18px;font-weight:700;margin-bottom:4px;color:var(--gold)}
+.pw-sub{font-size:11px;color:var(--t4);margin-bottom:20px;line-height:1.5}
+.pw-input{width:100%;background:var(--bg);border:1px solid var(--bdr2);border-radius:var(--r8);padding:10px 12px;color:var(--text);font-size:13px;margin-bottom:12px;text-align:center}
+.pw-input:focus{border-color:var(--gold-glow)}
+.pw-btn{width:100%;background:var(--gold);color:var(--bg);font-weight:700;padding:10px;border-radius:var(--r8);font-size:13px;transition:opacity .2s}
+.pw-btn:hover{opacity:.85}
+.pw-error{font-size:11px;color:var(--red-lt);margin-top:8px;min-height:16px}
+
+/* ── Header ── */
+#hdr{background:var(--s1);border-bottom:1px solid var(--bdr2);padding:0;position:sticky;top:0;z-index:300}
+#hdr-row1{display:flex;align-items:center;gap:8px;padding:0 12px;height:48px}
+.logo{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.logo-mark{width:28px;height:28px;background:var(--s3);border:1px solid var(--gold-glow);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-mark svg{width:14px;height:14px;fill:var(--gold)}
+.logo-text{display:flex;flex-direction:column;gap:1px}
+.logo-name{font-family:var(--font-display);font-weight:800;font-size:13px;letter-spacing:-.3px;color:var(--text);line-height:1}
+.logo-sub{font-size:7px;color:var(--gold);letter-spacing:2px;line-height:1;font-weight:500;text-transform:uppercase}
+#hdr-actions{margin-left:auto;display:flex;gap:6px}
+.ico-btn{background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r8);width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--t4);transition:all .2s}
+.ico-btn:hover{background:var(--s3);color:var(--text)}
+.ico-btn svg{width:15px;height:15px}
+
+/* ── Tab Nav ── */
+#tab-nav{display:flex;gap:0;background:var(--s1);border-bottom:1px solid var(--bdr2);overflow-x:auto;padding:0 8px;-webkit-overflow-scrolling:touch}
+.tab-btn{flex-shrink:0;padding:10px 14px;font-size:11px;color:var(--t4);background:none;border:none;cursor:pointer;transition:all .2s;border-bottom:2px solid transparent;white-space:nowrap;letter-spacing:.3px;font-weight:500}
+.tab-btn:hover{color:var(--t2)}
+.tab-btn.on{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-btn svg{width:13px;height:13px;margin-right:5px;vertical-align:middle}
+.tab-btn .count{display:inline-block;background:var(--s3);color:var(--t3);font-size:9px;border-radius:8px;padding:1px 6px;margin-left:4px;vertical-align:middle}
+
+/* ── Tab Content ── */
+.tab-panel{display:none;padding:16px 12px 24px;animation:fadeUp .25s ease}
+.tab-panel.on{display:block}
+
+/* ── Cards / Sections ── */
+.sec-title{font-family:var(--font-display);font-weight:700;font-size:15px;margin-bottom:4px;color:var(--text)}
+.sec-sub{font-size:11px;color:var(--t4);margin-bottom:16px;line-height:1.5}
+.sec-card{background:var(--s1);border:1px solid var(--bdr2);border-radius:var(--r12);padding:16px;margin-bottom:16px}
+
+/* ── Table ── */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r8);border:1px solid var(--bdr2)}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;padding:8px 10px;background:var(--s2);color:var(--t3);font-weight:600;letter-spacing:.3px;text-transform:uppercase;font-size:9px;border-bottom:1px solid var(--bdr2);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--bdr);color:var(--t2);vertical-align:middle}
+tr:hover td{background:var(--s2)}
+tr:last-child td{border-bottom:none}
+
+/* ── Status badges ── */
+.badge{display:inline-block;font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;letter-spacing:.3px}
+.badge-active{background:var(--green-dim);color:var(--green-lt)}
+.badge-blocked{background:rgba(192,57,43,.15);color:var(--red-lt)}
+.badge-away{background:rgba(192,138,46,.15);color:var(--amber-lt)}
+.badge-success{background:var(--green-dim);color:var(--green-lt)}
+.badge-error{background:rgba(192,57,43,.15);color:var(--red-lt)}
+
+/* ── Form elements ── */
+.fld-group{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.fld-row{display:flex;gap:8px;align-items:center}
+.fld-row label{font-size:11px;color:var(--t3);min-width:80px;flex-shrink:0}
+.fld-in{flex:1;background:var(--bg);border:1px solid var(--bdr2);border-radius:var(--r6);padding:8px 10px;color:var(--text);font-size:12px}
+.fld-in:focus{border-color:var(--gold-glow)}
+.fld-in::placeholder{color:var(--t5)}
+textarea.fld-in{resize:vertical;min-height:60px}
+.fld-hint{font-size:10px;color:var(--t4);margin-top:2px}
+.btn-primary{background:var(--gold);color:var(--bg);font-weight:700;padding:8px 14px;border-radius:var(--r6);font-size:12px;transition:opacity .2s}
+.btn-primary:hover{opacity:.85}
+.btn-primary:disabled{opacity:.4;cursor:default}
+.btn-ghost{background:var(--s2);border:1px solid var(--bdr2);color:var(--t2);padding:8px 14px;border-radius:var(--r6);font-size:12px;transition:all .2s}
+.btn-ghost:hover{background:var(--s3);color:var(--text)}
+.btn-danger{background:var(--red);color:#fff;font-weight:600;padding:8px 14px;border-radius:var(--r6);font-size:12px;transition:opacity .2s}
+.btn-danger:hover{opacity:.85}
+.btn-sm{padding:5px 10px;font-size:10px}
+
+/* ── Toggle ── */
+.toggle-wrap{display:flex;align-items:center;gap:10px}
+.toggle-track{width:38px;height:22px;background:var(--s3);border-radius:11px;position:relative;cursor:pointer;transition:background .3s;flex-shrink:0}
+.toggle-track.on{background:var(--green)}
+.toggle-knob{width:18px;height:18px;background:var(--text);border-radius:50%;position:absolute;top:2px;left:2px;transition:transform .3s}
+.toggle-track.on .toggle-knob{transform:translateX(16px)}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--s1);border:1px solid var(--bdr2);border-radius:var(--r10);padding:10px 18px;font-size:12px;color:var(--t2);display:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+#toast.on{display:block;animation:fadeUp .2s ease}
+
+/* ── Product card (catalog) ── */
+.cat-grid{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:600px){.cat-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.cat-grid{grid-template-columns:1fr 1fr 1fr}}
+.p-card{background:var(--s1);border:1px solid var(--bdr2);border-radius:var(--r10);overflow:hidden;display:flex;flex-direction:column}
+.p-card-img{width:100%;height:140px;object-fit:cover;border-bottom:1px solid var(--bdr);background:var(--s2);cursor:pointer}
+.p-card-body{padding:10px 12px 12px;flex:1}
+.p-card-brand{font-family:var(--font-display);font-weight:700;font-size:13px;color:var(--text)}
+.p-card-model{font-size:11px;color:var(--t2);margin-top:1px}
+.p-card-meta{font-size:10px;color:var(--t4);margin-top:4px;line-height:1.5}
+.p-card-cat{display:inline-block;font-size:8px;background:var(--gold-dim);color:var(--gold);border-radius:4px;padding:2px 6px;font-weight:600;margin-top:6px;letter-spacing:.3px;text-transform:uppercase}
+.p-card-footer{display:flex;gap:6px;padding:0 12px 12px}
+.p-card-sold{opacity:.6;filter:saturate(0)}
+.p-card-sold .p-card-brand{color:var(--sold-lt)}
+.sold-tag{font-size:9px;color:var(--sold-lt);font-weight:600;letter-spacing:.5px}
+.search-bar{width:100%;background:var(--bg);border:1px solid var(--bdr2);border-radius:var(--r8);padding:9px 12px;color:var(--text);font-size:12px;margin-bottom:12px}
+.search-bar:focus{border-color:var(--gold-glow)}
+.cat-tools{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.cat-tools .filter-pill{font-size:10px;padding:4px 10px;border-radius:20px;background:var(--s2);border:1px solid var(--bdr2);color:var(--t4);cursor:pointer;transition:all .2s}
+.cat-tools .filter-pill.on{background:var(--gold-dim);border-color:var(--gold-glow);color:var(--gold)}
+.cat-empty{padding:40px 20px;text-align:center;color:var(--t4);font-size:12px;line-height:1.6}
+
+/* ── Lightbox ── */
+#lightbox{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;padding:20px;cursor:pointer}
+#lightbox.on{display:flex}
+#lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:var(--r8)}
+
+/* ── API Keys ── */
+.key-row{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--bdr2);border-radius:var(--r8);padding:8px 10px;margin-bottom:6px}
+.key-row .key-label{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600;flex-shrink:0}
+.key-row .key-val{flex:1;font-size:11px;color:var(--t3);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.key-row .key-del{background:none;border:none;color:var(--t4);cursor:pointer;font-size:14px;padding:0 2px;flex-shrink:0}
+.key-row .key-del:hover{color:var(--red-lt)}
+
+/* ── Log ── */
+.log-entry{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:11px;color:var(--t2)}
+.log-entry:last-child{border-bottom:none}
+.log-time{color:var(--t4);flex-shrink:0;font-size:10px;width:70px}
+.log-device{flex-shrink:0;width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t3)}
+.log-part{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t2)}
+
+/* ── Lightbox (duplicate prevention) ── */
+.dup-lb{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;padding:20px;cursor:pointer}
+.dup-lb.on{display:flex}
+.dup-lb img{max-width:100%;max-height:100%;object-fit:contain;border-radius:var(--r8)}
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="pw-gate">
+  <div class="pw-box">
+    <div class="pw-icon">&#9881;</div>
+    <div class="pw-title">Panel de Administración</div>
+    <div class="pw-sub">Ingresa la contraseña de administrador</div>
+    <input class="pw-input" id="pw-input" type="password" placeholder="Contraseña" autocomplete="off"/>
+    <button class="pw-btn" id="pw-btn">Acceder</button>
+    <div class="pw-error" id="pw-error"></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div id="hdr">
+  <div id="hdr-row1">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <div class="logo-name">Desarmaduria Paola</div>
+        <div class="logo-sub">Panel de Administración</div>
+      </div>
+    </div>
+    <div id="hdr-actions">
+      <button class="ico-btn" id="btn-refresh" title="Refrescar datos">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TAB NAV -->
+<div id="tab-nav">
+  <button class="tab-btn on" data-tab="catalog"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Catálogo<span class="count" id="c-catalog">0</span></button>
+  <button class="tab-btn" data-tab="apikeys"><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys</button>
+  <button class="tab-btn" data-tab="devices"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1h6"/><path d="M9 23h6"/><path d="M12 21v-2"/></svg>Dispositivos<span class="count" id="c-devices">0</span></button>
+  <button class="tab-btn" data-tab="scanlog"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Historial</button>
+  <button class="tab-btn" data-tab="messages"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes</button>
+  <button class="tab-btn" data-tab="maintenance"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Mantenimiento</button>
+  <button class="tab-btn" data-tab="license"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Licencia</button>
+  <button class="tab-btn" data-tab="diagnostics"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Diagnóstico</button>
+</div>
+
+<!-- TAB: CATALOG -->
+<div class="tab-panel on" id="tab-catalog">
+  <div class="sec-title">Catálogo de partes</div>
+  <div class="sec-sub">Vista general de todas las partes escaneadas desde los dispositivos CAPv2.</div>
+  <input class="search-bar" id="cat-search" placeholder="Buscar por marca, modelo, años..."/>
+  <div class="cat-tools">
+    <span class="filter-pill on" data-f="all" onclick="setCatFilter('all')">Todas</span>
+    <span class="filter-pill" data-f="avail" onclick="setCatFilter('avail')">Disponibles</span>
+    <span class="filter-pill" data-f="sold" onclick="setCatFilter('sold')">Vendidas</span>
+    <span style="flex:1"></span>
+    <button class="btn-ghost btn-sm" onclick="exportExcel()">Exportar Excel</button>
+  </div>
+  <div id="cat-stats" style="font-size:10px;color:var(--t4);margin-bottom:10px"></div>
+  <div class="cat-grid" id="cat-grid"></div>
+  <div class="cat-empty" id="cat-empty" style="display:none">No hay partes que coincidan.</div>
+</div>
+
+<!-- TAB: API KEYS -->
+<div class="tab-panel" id="tab-apikeys">
+  <div class="sec-title">API Keys</div>
+  <div class="sec-sub">Gestiona las claves de API para Gemini, Groq y OpenRouter. Se sincronizan automáticamente con todos los dispositivos CAPv2.</div>
+  <div class="sec-card">
+    <div id="keys-list"></div>
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <div style="flex:1;position:relative">
+        <input id="api-key-in" type="password" placeholder="Ingresa nueva API key"
+          style="width:100%;background:var(--bg);border:1px solid var(--bdr2);color:var(--text);padding:9px 36px 9px 10px;border-radius:var(--r6);font-size:12px"/>
+        <button id="api-eye" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;display:flex;align-items:center;padding:0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <button class="btn-primary btn-sm" id="api-add">+ Agregar</button>
+    </div>
+    <div id="api-status" style="font-size:11px;margin-top:6px;min-height:16px;color:var(--t4)"></div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bdr2)">
+      <label style="font-size:11px;color:var(--t3);display:block;margin-bottom:4px">Modelo OpenRouter</label>
+      <select id="or-model-sel" style="width:100%;background:var(--bg);border:1px solid var(--bdr2);color:var(--text);padding:8px;border-radius:var(--r6);font-size:12px">
+        <option value="qwen/qwen2.5-vl-72b-instruct:free">Qwen 2.5 VL 72B (recomendado)</option>
+        <option value="google/gemma-3-27b-it:free">Gemma 3 27B</option>
+        <option value="mistralai/mistral-small-3.1-24b-instruct:free">Mistral Small 3.1</option>
+        <option value="moonshotai/kimi-vl-a3b-thinking:free">Kimi VL</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: DEVICES -->
+<div class="tab-panel" id="tab-devices">
+  <div class="sec-title">Dispositivos conectados</div>
+  <div class="sec-sub">Monitorea los dispositivos que ejecutan CAPv2. Puedes bloquear dispositivos para evitar su uso.</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Dispositivo</th><th>Nombre</th><th>Última conexión</th><th>Escaneos totales</th><th>Estado</th><th>Acción</th></tr></thead>
+      <tbody id="dev-tbody"></tbody>
+    </table>
+  </div>
+  <div id="dev-empty" style="display:none;padding:30px;text-align:center;color:var(--t4);font-size:12px">Sin dispositivos registrados aún.</div>
+</div>
+
+<!-- TAB: SCAN LOG -->
+<div class="tab-panel" id="tab-scanlog">
+  <div class="sec-title">Historial de escaneos</div>
+  <div class="sec-sub">Registro de todas las piezas escaneadas desde los dispositivos.</div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+    <input class="fld-in" id="sl-search" placeholder="Buscar por ID de parte o dispositivo" style="flex:1;min-width:150px"/>
+    <select class="fld-in" id="sl-filter" style="width:auto;min-width:100px">
+      <option value="all">Todos</option>
+      <option value="success">Exitosos</option>
+      <option value="error">Con error</option>
+    </select>
+    <button class="btn-ghost btn-sm" id="sl-refresh">Refrescar</button>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Hora</th><th>Dispositivo</th><th>Parte ID</th><th>Categoría</th><th>Resultado</th><th>Latencia</th></tr></thead>
+      <tbody id="sl-tbody"></tbody>
+    </table>
+  </div>
+  <div id="sl-empty" style="display:none;padding:30px;text-align:center;color:var(--t4);font-size:12px">Sin escaneos registrados aún.</div>
+  <div style="text-align:center;margin-top:12px">
+    <button class="btn-ghost btn-sm" id="sl-load-more">Cargar más</button>
+  </div>
+</div>
+
+<!-- TAB: MESSAGES -->
+<div class="tab-panel" id="tab-messages">
+  <div class="sec-title">Mensaje administrador</div>
+  <div class="sec-sub">Envía un mensaje que aparecerá como banner en todos los dispositivos CAPv2.</div>
+  <div class="sec-card">
+    <div class="fld-group">
+      <div class="fld-row">
+        <label>Mensaje</label>
+        <input class="fld-in" id="msg-text" placeholder="Ej: Nueva actualización disponible" maxlength="200"/>
+      </div>
+      <div class="fld-row">
+        <label>Tipo</label>
+        <select class="fld-in" id="msg-type" style="width:auto">
+          <option value="info">Info (azul)</option>
+          <option value="warning">Advertencia (amarillo)</option>
+          <option value="critical">Crítico (rojo)</option>
+        </select>
+      </div>
+      <div class="fld-row">
+        <label></label>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary btn-sm" id="msg-send">Enviar mensaje</button>
+          <button class="btn-ghost btn-sm" id="msg-clear">Limpiar mensaje</button>
+        </div>
+      </div>
+      <div id="msg-preview" style="background:var(--bg);border:1px solid var(--bdr2);border-radius:var(--r6);padding:10px 14px;font-size:12px;color:var(--t4);display:none;line-height:1.5"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: MAINTENANCE -->
+<div class="tab-panel" id="tab-maintenance">
+  <div class="sec-title">Modo mantenimiento</div>
+  <div class="sec-sub">Activa el modo mantenimiento para bloquear temporalmente todos los dispositivos CAPv2.</div>
+  <div class="sec-card">
+    <div class="fld-row" style="margin-bottom:14px">
+      <div class="toggle-wrap">
+        <div class="toggle-track" id="maint-toggle">
+          <div class="toggle-knob"></div>
+        </div>
+        <span style="font-size:12px;color:var(--t2)" id="maint-label">Mantenimiento desactivado</span>
+      </div>
+    </div>
+    <div class="fld-group">
+      <div class="fld-row">
+        <label>Mensaje</label>
+        <input class="fld-in" id="maint-msg" placeholder="Ej: Sistema en mantenimiento programado" maxlength="200"/>
+      </div>
+      <div class="fld-row">
+        <label></label>
+        <button class="btn-primary btn-sm" id="maint-save">Guardar configuración</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: LICENSE -->
+<div class="tab-panel" id="tab-license">
+  <div class="sec-title">Configuración de licencia</div>
+  <div class="sec-sub">El license_secret se usa para validar los códigos de licencia en los dispositivos CAPv2.</div>
+  <div class="sec-card">
+    <div class="fld-group">
+      <div class="fld-row">
+        <label>Secret actual</label>
+        <input class="fld-in" id="lic-secret" type="password" placeholder="License secret"/>
+      </div>
+      <div class="fld-row">
+        <label>Nuevo secret</label>
+        <input class="fld-in" id="lic-new-secret" type="password" placeholder="Nuevo valor (opcional)"/>
+      </div>
+      <div class="fld-row">
+        <label>Proveedor IA</label>
+        <select class="fld-in" id="lic-provider" style="width:auto">
+          <option value="gemini">Gemini</option>
+          <option value="groq">Groq</option>
+          <option value="openrouter">OpenRouter</option>
+        </select>
+      </div>
+      <div class="fld-row">
+        <label>Modelo IA</label>
+        <input class="fld-in" id="lic-model" placeholder="gemini-2.0-flash"/>
+      </div>
+      <div class="fld-row">
+        <label></label>
+        <button class="btn-primary btn-sm" id="lic-save">Guardar configuración</button>
+      </div>
+    </div>
+  </div>
+  <div class="sec-card">
+    <div style="font-family:var(--font-display);font-weight:700;font-size:13px;margin-bottom:12px;color:var(--text)">Generar código de acceso</div>
+    <div style="font-size:10px;color:var(--t4);margin-bottom:14px;line-height:1.5">Generá un código con formato <strong>AP-XXXX-MMAA-XXXXXXXX</strong> para entregar a cada usuario de CAPv2.</div>
+    <div class="fld-group">
+      <div class="fld-row">
+        <label>Cliente</label>
+        <input class="fld-in" id="lic-gen-client" placeholder="Ej: C001" maxlength="10"/>
+      </div>
+      <div class="fld-row">
+        <label>Mes</label>
+        <select class="fld-in" id="lic-gen-month" style="width:auto">
+          <option value="1">01</option><option value="2">02</option><option value="3">03</option><option value="4">04</option><option value="5">05</option><option value="6">06</option>
+          <option value="7">07</option><option value="8">08</option><option value="9">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+        </select>
+      </div>
+      <div class="fld-row">
+        <label>Año</label>
+        <select class="fld-in" id="lic-gen-year" style="width:auto">
+          <option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
+        </select>
+      </div>
+      <div class="fld-row">
+        <label></label>
+        <button class="btn-primary btn-sm" id="lic-gen-btn">Generar código</button>
+      </div>
+      <div class="fld-row" id="lic-gen-result" style="display:none">
+        <label style="color:var(--green-lt)">Código</label>
+        <div style="flex:1;display:flex;gap:6px;align-items:center">
+          <input class="fld-in" id="lic-gen-output" readonly style="font-family:monospace;letter-spacing:1px;color:var(--gold);font-weight:600"/>
+          <button class="btn-ghost btn-sm" id="lic-gen-copy" title="Copiar">Copiar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: DIAGNOSTICS -->
+<div class="tab-panel" id="tab-diagnostics">
+  <div class="sec-title">Diagnóstico del sistema</div>
+  <div class="sec-sub">Verifica la conectividad y el estado de cada componente.</div>
+  <div class="sec-card">
+    <div id="diag-steps" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+    <div id="diag-log" style="display:none;background:var(--bg);border:1px solid var(--bdr2);border-radius:var(--r8);padding:10px;font-size:11px;color:var(--t3);font-family:monospace;white-space:pre-wrap;max-height:200px;overflow-y:auto;margin-bottom:12px"></div>
+    <button class="btn-primary" id="diag-run">Ejecutar diagnóstico completo</button>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div id="confirm-bg" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:20px">
+  <div id="confirm-box" style="background:var(--s1);border:1px solid var(--bdr2);border-radius:var(--r12);padding:24px;max-width:340px;width:100%;text-align:center">
+    <h3 id="conf-title" style="font-family:var(--font-display);font-weight:700;font-size:15px;margin-bottom:8px;color:var(--text)">Confirmar</h3>
+    <p id="conf-msg" style="font-size:12px;color:var(--t3);margin-bottom:16px;line-height:1.5"></p>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button id="conf-ok" class="btn-primary">Confirmar</button>
+      <button id="conf-cancel" class="btn-ghost">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox()">
+  <img id="lb-img" src="" alt=""/>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+// SUPABASE CONFIG
+// ════════════════════════════════════════════
+const SB_URL = "https://xkguzluwbbxsbustlcxo.supabase.co";
+const SB_KEY = "sb_publishable_1Asg-FYNLYby-n-upo5NAg_z6ZJ4TTx";
+
+// ════════════════════════════════════════════
+// PASSWORD GATE
+// ════════════════════════════════════════════
+const PW_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"; // SHA-256 of "admin"
+let authed = false;
+
+function authedOnly() { if (!authed) { window.location.reload(); return false; } return true; }
+
+async function checkSavedSession() {
+  try {
+    const saved = localStorage.getItem("ap_session");
+    if (saved) {
+      const s = JSON.parse(saved);
+      if (s && s.exp > Date.now()) { authed = true; return true; }
+    }
+  } catch(_) {}
+  return false;
+}
+
+function sha256(str) {
+  const chrsz = 8;
+  function safe_add(x, y) { const lsw = (x & 0xFFFF) + (y & 0xFFFF); return (x >>> 16) + (y >>> 16) + (lsw >>> 16) << 16 | lsw & 0xFFFF; }
+  function S(X, n) { return X >>> n; } function R(X, n) { return X << n >>> 0; }
+  function Ch(x, y, z) { return x & y ^ ~x & z; } function Maj(x, y, z) { return x & y ^ x & z ^ y & z; }
+  function Sigma0256(x) { return S(x, 2) ^ S(x, 13) ^ S(x, 22); } function Sigma1256(x) { return S(x, 6) ^ S(x, 11) ^ S(x, 25); }
+  function Gamma0256(x) { return S(x, 7) ^ S(x, 18) ^ R(x, 3); } function Gamma1256(x) { return S(x, 17) ^ S(x, 19) ^ R(x, 10); }
+  const K = [1116352408,1899447441,3049323471,3921009573,961987163,1508970993,2453635748,2870763221,3624381080,310598401,607225278,1426881987,1925078388,2162078206,2614888103,3248222580,3835390401,4022224774,264347078,604807628,770255983,1249150122,1555081692,1996064986,2554220882,2821834349,2952996808,3210313671,3336571891,3584528711,113926993,338241895,666307205,773529912,1294757372,1396182291,1695183700,1986661051,2177026350,2456956037,2730485921,2820302411,3259730800,3345764771,3516065817,3600352804,4094571909,275423344,430227734,506948616,659060556,883997877,958139571,1322822218,1537002063,1747873779,1955562222,2024104815,2227730452,2361852424,2428436474,2756734187,3204031479,3329325298];
+  const l = str.length * chrsz; const m = [];
+  for (let i = 0; i < l; i += chrsz) m[i>>5] |= (str.charCodeAt(i / chrsz) & 0xFF) << (24 - i % 32);
+  m[l>>5] |= 0x80 << (24 - l % 32); m[((l + 64 >> 9) << 4) + 15] = l;
+  let H = [1779033703, 3144134277, 1013904242, 2773480762, 1359893119, 2600822924, 528734635, 1541459225];
+  for (let i = 0; i < m.length; i += 16) {
+    const W = new Array(64);
+    for (let t = 0; t < 16; t++) W[t] = m[i + t];
+    for (let t = 16; t < 64; t++) W[t] = safe_add(safe_add(safe_add(Gamma1256(W[t - 2]), W[t - 7]), Gamma0256(W[t - 15])), W[t - 16]);
+    let a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+    for (let t = 0; t < 64; t++) {
+      const T1 = safe_add(safe_add(safe_add(safe_add(h, Sigma1256(e)), Ch(e, f, g)), K[t]), W[t]);
+      const T2 = safe_add(Sigma0256(a), Maj(a, b, c));
+      h = g; g = f; f = e; e = safe_add(d, T1); d = c; c = b; b = a; a = safe_add(T1, T2);
+    }
+    H[0] = safe_add(H[0], a); H[1] = safe_add(H[1], b); H[2] = safe_add(H[2], c); H[3] = safe_add(H[3], d);
+    H[4] = safe_add(H[4], e); H[5] = safe_add(H[5], f); H[6] = safe_add(H[6], g); H[7] = safe_add(H[7], h);
+  }
+  return H.map(x => ("0123456789abcdef").split("").reduce((s, _, i) => s + "0123456789abcdef"[(x >>> (7 - i) * 4) & 15], "")).join("");
+}
+
+async function doLogin() {
+  const pw = document.getElementById("pw-input").value;
+  const errEl = document.getElementById("pw-error");
+  let hash;
+  try {
+    if (crypto.subtle) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pw));
+      hash = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("");
+    } else { throw 1; }
+  } catch(e) { hash = sha256(pw); }
+  if (hash !== PW_HASH) {
+    errEl.textContent = "Contraseña incorrecta";
+    document.getElementById("pw-input").value = "";
+    return;
+  }
+  authed = true;
+  errEl.textContent = "";
+  localStorage.setItem("ap_session", JSON.stringify({ exp: Date.now() + 86400000 }));
+  document.getElementById("pw-gate").classList.add("gone");
+  loadAllData();
+}
+
+document.getElementById("pw-btn").onclick = doLogin;
+document.getElementById("pw-input").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+let parts = [];
+let devices = [];
+let scanLogs = [];
+let adminConfig = null;
+let allLoaded = false;
+
+let catFilter = "all";
+let catSearch = "";
+let slSearch = "";
+let slFilter = "all";
+let slPage = 0;
+const SL_PAGE_SIZE = 50;
+
+let confirmCb = null;
+const $ = id => document.getElementById(id);
+
+// ════════════════════════════════════════════
+// SUPABASE HELPERS
+// ════════════════════════════════════════════
+async function sbFetch(path, method="GET", body=null) {
+  const opts = { method, headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Content-Type": "application/json" } };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const res = await fetch(SB_URL + path, opts);
+    if (!res.ok) { const t = await res.text(); throw new Error(`HTTP ${res.status}: ${t.slice(0,100)}`); }
+    if (method === "DELETE" || method === "PATCH") return null;
+    const ct = res.headers.get("content-type") || "";
+    if (ct.includes("json")) return res.json();
+    return null;
+  } catch(e) { console.error("sbFetch error:", e); throw e; }
+}
+
+async function sbFetchAll(path) {
+  let all = [], page = 0, pageSize = 1000;
+  while (true) {
+    const offset = page * pageSize;
+    const url = `${path}&offset=${offset}&limit=${pageSize}`;
+    const data = await sbFetch(url, "GET");
+    if (!data || data.length === 0) break;
+    all = all.concat(data);
+    if (data.length < pageSize) break;
+    page++;
+  }
+  return all;
+}
+
+async function loadAdminConfig() {
+  try {
+    const data = await sbFetch("/rest/v1/admin_config?select=*&limit=1", "GET");
+    if (data && data.length > 0) {
+      adminConfig = data[0];
+      if (typeof adminConfig.api_keys === "string") {
+        try { adminConfig.api_keys = JSON.parse(adminConfig.api_keys); } catch(_) { adminConfig.api_keys = []; }
+      }
+      if (!Array.isArray(adminConfig.api_keys)) adminConfig.api_keys = [];
+    } else { adminConfig = null; }
+  } catch(e) { console.warn("loadAdminConfig:", e); adminConfig = null; }
+  return adminConfig;
+}
+
+async function updateAdminConfig(updates) {
+  if (!allLoaded) return;
+  try {
+    const payload = { ...updates, updated_at: new Date().toISOString() };
+    const rows = await sbFetch("/rest/v1/admin_config?select=id&limit=1", "GET");
+    if (rows && rows.length > 0) {
+      await sbFetch(`/rest/v1/admin_config?id=eq.${rows[0].id}`, "PATCH", payload);
+    } else {
+      await sbFetch("/rest/v1/admin_config", "POST", payload);
+    }
+  } catch(e) { console.warn("updateAdminConfig:", e); toast("Error al guardar"); }
+  await loadAdminConfig();
+}
+
+async function loadParts() {
+  try {
+    const data = await sbFetchAll("/rest/v1/partes?select=id,data,created_at&order=created_at.desc");
+    parts = data.map(d => {
+      const p = { id: d.id, ...(d.data || {}), created_at: d.created_at };
+      if (p.photoUrl) { p.preview = p.photoUrl; p.previewFull = p.photoUrl; }
+      return p;
+    });
+    renderCatalog();
+  } catch(e) { console.error("loadParts:", e); toast("Error al cargar catálogo"); }
+}
+
+async function loadDevices() {
+  try {
+    const data = await sbFetchAll("/rest/v1/devices?select=*&order=last_seen.desc");
+    devices = data || [];
+    renderDevices();
+  } catch(e) { console.error("loadDevices:", e); toast("Error al cargar dispositivos"); }
+}
+
+async function loadScanLogs(append) {
+  try {
+    const offset = append ? slPage * SL_PAGE_SIZE : 0;
+    const params = `/rest/v1/scan_log?select=*&order=timestamp.desc&limit=${SL_PAGE_SIZE}&offset=${offset}`;
+    const data = await sbFetch(params, "GET");
+    if (!append) { scanLogs = data || []; } else { scanLogs = scanLogs.concat(data || []); }
+    slPage = append ? slPage + 1 : 1;
+    renderScanLog();
+  } catch(e) { console.error("loadScanLogs:", e); toast("Error al cargar historial"); }
+}
+
+async function updateDeviceStatus(deviceId, status) {
+  try {
+    await sbFetch(`/rest/v1/devices?id=eq.${encodeURIComponent(deviceId)}`, "PATCH", { status });
+    await loadDevices();
+    toast(`Dispositivo ${status === "active" ? "activado" : "bloqueado"}`);
+  } catch(e) { toast("Error al actualizar dispositivo"); }
+}
+
+async function deletePart(partId) {
+  try {
+    await sbFetch(`/rest/v1/partes?id=eq.${encodeURIComponent(partId)}`, "DELETE");
+    parts = parts.filter(p => p.id !== partId);
+    renderCatalog();
+    toast("Parte eliminada");
+  } catch(e) { toast("Error al eliminar"); }
+}
+
+// ════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("on"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("on"));
+    btn.classList.add("on");
+    $(`tab-${btn.dataset.tab}`).classList.add("on");
+  };
+});
+
+// ════════════════════════════════════════════
+// LOAD ALL DATA
+// ════════════════════════════════════════════
+async function loadAllData() {
+  await loadAdminConfig();
+  // Load config into license tab
+  if (adminConfig) {
+    $("lic-secret").value = adminConfig.license_secret || "";
+    $("lic-provider").value = adminConfig.ai_provider || "gemini";
+    $("lic-model").value = adminConfig.ai_model || "";
+    // Messages tab
+    $("msg-text").value = adminConfig.admin_message || "";
+    $("msg-type").value = adminConfig.admin_message_type || "info";
+    // Maintenance tab
+    if (adminConfig.maintenance_mode) {
+      $("maint-toggle").classList.add("on");
+      $("maint-label").textContent = "Mantenimiento activado";
+    }
+    $("maint-msg").value = adminConfig.maintenance_message || "";
+    // Keys
+    renderKeysList();
+    // OR model
+    const orModel = adminConfig.ai_model && adminConfig.ai_model.includes("/") ? adminConfig.ai_model : "qwen/qwen2.5-vl-72b-instruct:free";
+    $("or-model-sel").value = orModel;
+  }
+  allLoaded = true;
+  loadParts();
+  loadDevices();
+  loadScanLogs(false);
+}
+
+// ════════════════════════════════════════════
+// CATALOG
+// ════════════════════════════════════════════
+function setCatFilter(f) {
+  catFilter = f;
+  document.querySelectorAll(".filter-pill").forEach(p => p.classList.toggle("on", p.dataset.f === f));
+  renderCatalog();
+}
+
+$("cat-search").oninput = () => {
+  catSearch = $("cat-search").value.toLowerCase();
+  renderCatalog();
+};
+
+function renderCatalog() {
+  let filtered = [...parts];
+  if (catSearch) {
+    const q = catSearch;
+    filtered = filtered.filter(p =>
+      (p.marca || "").toLowerCase().includes(q) ||
+      (p.modelo || "").toLowerCase().includes(q) ||
+      (p.años || "").includes(q) ||
+      (p.descripcion || "").toLowerCase().includes(q) ||
+      (p.posicion || "").toLowerCase().includes(q)
+    );
+  }
+  if (catFilter === "avail") filtered = filtered.filter(p => !p.sold);
+  if (catFilter === "sold") filtered = filtered.filter(p => p.sold);
+
+  const grid = $("cat-grid");
+  const empty = $("cat-empty");
+  const stats = $("cat-stats");
+  const totalAvail = parts.filter(p => !p.sold).length;
+  const totalSold = parts.filter(p => p.sold).length;
+  stats.textContent = `${parts.length} totales · ${totalAvail} disponibles · ${totalSold} vendidas`;
+  document.getElementById("c-catalog").textContent = parts.length;
+
+  if (filtered.length === 0) { grid.innerHTML = ""; empty.style.display = "block"; return; }
+  empty.style.display = "none";
+
+  grid.innerHTML = filtered.map(p => {
+    const imgSrc = p.preview || p.previewFull || "";
+    const soldClass = p.sold ? "p-card-sold" : "";
+    const catLabel = { parachoques:"Parachoques", opticos:"Ópticos", focos:"Focos", guardabarros:"Guardabarros", capots:"Capots", varios:"Varios" }[p.categoria] || p.categoria || "";
+    const confianza = p.confianza || "";
+    return `<div class="p-card ${soldClass}">
+      ${imgSrc ? `<img class="p-card-img" src="${escH(imgSrc)}" onclick="openLightbox('${escH(imgSrc)}')" alt=""/>` : `<div class="p-card-img" style="display:flex;align-items:center;justify-content:center;color:var(--t5);font-size:10px">Sin foto</div>`}
+      <div class="p-card-body">
+        <div class="p-card-brand">${escH(p.marca || "No determinado")}</div>
+        <div class="p-card-model">${escH(p.modelo || "No determinado")}</div>
+        <div class="p-card-meta">${escH(p.años || "")}${p.posicion ? " · " + escH(p.posicion) : ""}</div>
+        <div class="p-card-meta">${escH((p.descripcion || "").slice(0, 80))}</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:6px">
+          ${catLabel ? `<span class="p-card-cat">${catLabel}</span>` : ""}
+          ${confianza ? `<span style="font-size:8px;color:var(--t4)">${confianza}</span>` : ""}
+          ${p.sold ? `<span class="sold-tag">VENDIDA</span>` : ""}
+        </div>
+      </div>
+      <div class="p-card-footer">
+        <button class="btn-ghost btn-sm" data-pid="${escH(p.id)}" onclick="showConfirm('Eliminar parte','¿Eliminar esta parte del catálogo?',deletePart.bind(null,this.dataset.pid),true)">Eliminar</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ════════════════════════════════════════════
+// API KEYS
+// ════════════════════════════════════════════
+function renderKeysList() {
+  const el = $("keys-list"); if (!el) return;
+  let keys = adminConfig?.api_keys || [];
+  if (typeof keys === 'string') { try { keys = JSON.parse(keys); } catch(_) { keys = []; } }
+  el.innerHTML = "";
+  if (keys.length === 0) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--t4);text-align:center;padding:8px">Sin API keys configuradas</div>';
+    return;
+  }
+  keys.forEach((k, i) => {
+    const isOR   = k.startsWith("sk-or-");
+    const isGroq = k.startsWith("gsk_");
+    const label  = isOR ? "OpenRouter" : isGroq ? "Groq" : "Gemini";
+    const color  = isOR ? "var(--amber-lt)" : isGroq ? "var(--green-lt)" : "var(--green-lt)";
+    const row = document.createElement("div");
+    row.className = "key-row";
+    row.innerHTML = `
+      <span class="key-label" style="background:${color}22;color:${color}">${label}</span>
+      <span class="key-val">…${k.slice(-12)}</span>
+      <button class="key-del" onclick="removeKey(${i})">×</button>`;
+    el.appendChild(row);
+  });
+}
+
+window.removeKey = async function(i) {
+  if (!authedOnly()) return;
+  const keys = adminConfig?.api_keys || [];
+  keys.splice(i, 1);
+  await updateAdminConfig({ api_keys: keys });
+  renderKeysList();
+  toast("Key eliminada");
+};
+
+$("api-eye").onclick = () => {
+  const inp = $("api-key-in");
+  inp.type = inp.type === "password" ? "text" : "password";
+};
+
+$("api-add").onclick = async () => {
+  if (!authedOnly()) return;
+  const k = $("api-key-in").value.trim();
+  const st = $("api-status");
+  if (!k) return;
+  const isOR    = k.startsWith("sk-or-");
+  const isGemini= k.startsWith("AIza") || k.startsWith("AQ");
+  const isGroq  = k.startsWith("gsk_");
+  if (!isGemini && !isOR && !isGroq) {
+    st.textContent = "Clave inválida — verifica que sea correcta";
+    st.style.color = "var(--red-lt)"; return;
+  }
+  const keys = adminConfig?.api_keys || [];
+  if (keys.includes(k)) { st.textContent = "Esta key ya está guardada"; st.style.color = "var(--amber-lt)"; return; }
+  keys.push(k);
+  await updateAdminConfig({ api_keys: keys });
+  $("api-key-in").value = "";
+  st.textContent = `Key ${keys.length} agregada`; st.style.color = "var(--green-lt)";
+  renderKeysList();
+  setTimeout(() => { st.textContent = ""; }, 2000);
+};
+
+$("or-model-sel").onchange = async () => {
+  if (!authedOnly()) return;
+  await updateAdminConfig({ ai_model: $("or-model-sel").value });
+  toast("Modelo OpenRouter actualizado");
+};
+
+// ════════════════════════════════════════════
+// DEVICES
+// ════════════════════════════════════════════
+function renderDevices() {
+  const tbody = $("dev-tbody");
+  const empty = $("dev-empty");
+  document.getElementById("c-devices").textContent = devices.length;
+  if (devices.length === 0) { tbody.innerHTML = ""; empty.style.display = "block"; return; }
+  empty.style.display = "none";
+  tbody.innerHTML = devices.map(d => {
+    const lastSeen = d.last_seen ? new Date(d.last_seen + "Z").toLocaleString("es-CL") : "—";
+    const isActive = d.status === "active";
+    const isOnline = d.last_seen && (Date.now() - new Date(d.last_seen + "Z").getTime() < 300000);
+    const statusClass = d.status === "blocked" ? "badge-blocked" : isOnline ? "badge-active" : "badge-away";
+    const statusLabel = d.status === "blocked" ? "Bloqueado" : isOnline ? "Activo" : "Ausente";
+    return `<tr>
+      <td style="font-family:monospace;font-size:10px">${escH(d.id)}</td>
+      <td>${escH(d.nombre || "—")}</td>
+      <td style="font-size:10px;color:var(--t4)">${lastSeen}</td>
+      <td>${d.total_scans || 0}</td>
+      <td><span class="badge ${statusClass}">${statusLabel}</span></td>
+      <td>
+        ${isActive
+          ? `<button class="btn-ghost btn-sm" data-did="${escH(d.id)}" onclick="showConfirm('Bloquear dispositivo','¿Bloquear este dispositivo? No podrá usar CAPv2.',updateDeviceStatus.bind(null,this.dataset.did,'blocked'),true)">Bloquear</button>`
+          : `<button class="btn-ghost btn-sm" onclick="updateDeviceStatus('${d.id}','active')">Activar</button>`}
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+// ════════════════════════════════════════════
+// SCAN LOG
+// ════════════════════════════════════════════
+$("sl-search").oninput = () => { slSearch = $("sl-search").value.toLowerCase(); renderScanLog(); };
+$("sl-filter").onchange = () => { slFilter = $("sl-filter").value; renderScanLog(); };
+$("sl-refresh").onclick = () => { slPage = 0; loadScanLogs(false); };
+$("sl-load-more").onclick = () => { loadScanLogs(true); };
+
+function renderScanLog() {
+  const tbody = $("sl-tbody");
+  const empty = $("sl-empty");
+  let filtered = [...scanLogs];
+  if (slSearch) {
+    const q = slSearch;
+    filtered = filtered.filter(l => l.part_id?.includes(q) || l.device_id?.includes(q));
+  }
+  if (slFilter !== "all") filtered = filtered.filter(l => l.resultado === slFilter);
+
+  if (filtered.length === 0 && slPage <= 1) { tbody.innerHTML = ""; empty.style.display = "block"; return; }
+  empty.style.display = "none";
+  tbody.innerHTML = filtered.map(l => {
+    const ts = l.timestamp ? new Date(l.timestamp + "Z").toLocaleString("es-CL") : "—";
+    const resClass = l.resultado === "success" ? "badge-success" : "badge-error";
+    return `<tr>
+      <td style="font-size:10px;color:var(--t4);white-space:nowrap">${ts}</td>
+      <td style="font-family:monospace;font-size:10px">${escH((l.device_id || "").slice(0, 12))}</td>
+      <td style="font-family:monospace;font-size:10px">${escH(l.part_id || "")}</td>
+      <td>${escH(l.categoria || "")}</td>
+      <td><span class="badge ${resClass}">${l.resultado || "—"}</span></td>
+      <td style="color:var(--t4)">${l.latencia_ms != null ? l.latencia_ms + "ms" : "—"}</td>
+    </tr>`;
+  }).join("");
+}
+
+// ════════════════════════════════════════════
+// MESSAGES
+// ════════════════════════════════════════════
+$("msg-text").oninput = updateMsgPreview;
+$("msg-type").onchange = updateMsgPreview;
+
+function updateMsgPreview() {
+  const text = $("msg-text").value.trim();
+  const type = $("msg-type").value;
+  const preview = $("msg-preview");
+  if (!text) { preview.style.display = "none"; return; }
+  preview.style.display = "block";
+  const colors = { info: "var(--t2)", warning: "var(--amber-lt)", critical: "var(--red-lt)" };
+  const borders = { info: "var(--bdr2)", warning: "var(--amber-lt)", critical: "var(--red-lt)" };
+  preview.style.borderColor = borders[type] || "var(--bdr2)";
+  preview.style.color = colors[type] || "var(--t2)";
+  preview.textContent = text;
+}
+
+$("msg-send").onclick = async () => {
+  if (!authedOnly()) return;
+  const text = $("msg-text").value.trim();
+  if (!text) { toast("Escribe un mensaje"); return; }
+  await updateAdminConfig({ admin_message: text, admin_message_type: $("msg-type").value });
+  toast("Mensaje enviado a dispositivos");
+};
+
+$("msg-clear").onclick = async () => {
+  if (!authedOnly()) return;
+  $("msg-text").value = "";
+  $("msg-type").value = "info";
+  updateMsgPreview();
+  await updateAdminConfig({ admin_message: "", admin_message_type: "info" });
+  toast("Mensaje eliminado");
+};
+
+// ════════════════════════════════════════════
+// MAINTENANCE
+// ════════════════════════════════════════════
+$("maint-toggle").onclick = () => {
+  $("maint-toggle").classList.toggle("on");
+  $("maint-label").textContent = $("maint-toggle").classList.contains("on") ? "Mantenimiento activado" : "Mantenimiento desactivado";
+};
+
+$("maint-save").onclick = async () => {
+  if (!authedOnly()) return;
+  const enabled = $("maint-toggle").classList.contains("on");
+  const msg = $("maint-msg").value.trim();
+  await updateAdminConfig({ maintenance_mode: enabled, maintenance_message: msg });
+  toast("Configuración de mantenimiento guardada");
+};
+
+// ════════════════════════════════════════════
+// LICENSE CONFIG
+// ════════════════════════════════════════════
+$("lic-save").onclick = async () => {
+  if (!authedOnly()) return;
+  const secret = $("lic-secret").value.trim();
+  const newSecret = $("lic-new-secret").value.trim();
+  const provider = $("lic-provider").value;
+  const model = $("lic-model").value.trim();
+  const updates = { ai_provider: provider, ai_model: model };
+  if (secret) updates.license_secret = secret;
+  if (newSecret) updates.license_secret = newSecret;
+  await updateAdminConfig(updates);
+  $("lic-new-secret").value = "";
+  toast("Configuración de licencia guardada");
+};
+
+// ── LICENSE CODE GENERATOR ──
+async function licHash(secret, clientId, month, year2d) {
+  const raw = `${secret}|${clientId}|${String(month).padStart(2,'0')}|${String(year2d).padStart(2,'0')}`;
+  try {
+    if (crypto.subtle) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('').toUpperCase().slice(0, 8);
+    }
+  } catch(e) {}
+  return sha256(raw).toUpperCase().slice(0, 8);
+}
+
+$("lic-gen-btn").onclick = async () => {
+  if (!authedOnly()) return;
+  const client = $("lic-gen-client").value.trim().toUpperCase();
+  if (!client) { toast("Ingresa un ID de cliente"); return; }
+  const month = parseInt($("lic-gen-month").value);
+  const year2d = parseInt($("lic-gen-year").value);
+  const resultEl = $("lic-gen-result");
+  const outputEl = $("lic-gen-output");
+  // Read current secret from admin config
+  const cfg = await sbFetch("/rest/v1/admin_config?select=license_secret&limit=1");
+  const secret = cfg && cfg[0]?.license_secret || "PaolaDesarm_2026_X9k7mQr4";
+  const hash = await licHash(secret, client, month, year2d);
+  const code = `AP-${client}-${String(month).padStart(2,'0')}${String(year2d).padStart(2,'0')}-${hash}`;
+  outputEl.value = code;
+  resultEl.style.display = "flex";
+  toast("Código generado");
+};
+
+$("lic-gen-copy").onclick = () => {
+  const output = $("lic-gen-output");
+  output.select();
+  navigator.clipboard?.writeText(output.value);
+  toast("Copiado al portapapeles");
+};
+
+// ════════════════════════════════════════════
+// DIAGNOSTICS
+// ════════════════════════════════════════════
+$("diag-run").onclick = async () => {
+  if (!authedOnly()) return;
+  const stepsEl = $("diag-steps");
+  const logEl = $("diag-log");
+  logEl.style.display = "none";
+  logEl.textContent = "";
+
+  const tests = [
+    { label: "Conexión a Supabase REST", run: async () => { const r = await fetch(SB_URL + "/rest/v1/", { headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY } }); return r.ok; } },
+    { label: "Tabla admin_config accesible", run: async () => { const d = await sbFetch("/rest/v1/admin_config?select=id&limit=1", "GET"); return Array.isArray(d); } },
+    { label: "Tabla dispositivos accesible", run: async () => { const d = await sbFetch("/rest/v1/devices?select=id&limit=1", "GET"); return Array.isArray(d); } },
+    { label: "Tabla scan_log accesible", run: async () => { const d = await sbFetch("/rest/v1/scan_log?select=id&limit=1", "GET"); return Array.isArray(d); } },
+    { label: "Tabla partes accesible", run: async () => { const d = await sbFetch("/rest/v1/partes?select=id&limit=1", "GET"); return Array.isArray(d); } },
+    { label: "Storage bucket Fotos", run: async () => { const r = await fetch(`${SB_URL}/storage/v1/object/list/Fotos`, { method: "POST", headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json" }, body: JSON.stringify({ limit: 1, offset: 0 }) }); return r.ok; } },
+  ];
+
+  stepsEl.innerHTML = "";
+  for (const t of tests) {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border:1px solid var(--bdr2);border-radius:var(--r6);font-size:11px;color:var(--t3)";
+    row.innerHTML = `<div style="width:16px;height:16px;border:2px solid var(--t5);border-radius:50%;flex-shrink:0" class="diag-icon"></div><span>${t.label}</span><span style="margin-left:auto;font-size:10px" class="diag-result">Probando…</span>`;
+    stepsEl.appendChild(row);
+    try {
+      const ok = await t.run();
+      row.querySelector(".diag-icon").style.cssText = `width:16px;height:16px;border-radius:50%;flex-shrink:0;background:${ok?"var(--green)":"var(--red)"}`;
+      row.querySelector(".diag-result").textContent = ok ? "OK" : "FALLO";
+      row.querySelector(".diag-result").style.color = ok ? "var(--green-lt)" : "var(--red-lt)";
+      if (!ok) {
+        logEl.style.display = "block";
+        logEl.textContent += `[FALLO] ${t.label}\n`;
+      }
+    } catch(e) {
+      row.querySelector(".diag-icon").style.cssText = `width:16px;height:16px;border-radius:50%;flex-shrink:0;background:var(--red)`;
+      row.querySelector(".diag-result").textContent = "ERROR";
+      row.querySelector(".diag-result").style.color = "var(--red-lt)";
+      logEl.style.display = "block";
+      logEl.textContent += `[ERROR] ${t.label}: ${e.message}\n`;
+    }
+  }
+  toast("Diagnóstico completado");
+};
+
+// ════════════════════════════════════════════
+// EXPORT EXCEL
+// ════════════════════════════════════════════
+function exportExcel() {
+  if (!parts.length) { toast("Catálogo vacío"); return; }
+  const catOrder = ["parachoques","opticos","focos","guardabarros","capots","varios"];
+  const catLabels = { parachoques:"Parachoques", opticos:"Ópticos", focos:"Focos", guardabarros:"Guardabarros", capots:"Capots", varios:"Varios" };
+  const wb = XLSX.utils.book_new();
+  let hasData = false;
+  catOrder.forEach(key => {
+    const items = parts.filter(p => p.categoria === key);
+    if (!items.length) return;
+    const rows = items.map((p, i) => ({
+      "#": i + 1, "Archivo": p.fileName || p.id || "", "Marca": p.marca || "", "Modelo": p.modelo || "",
+      "Años": p.años || "", "Posición": p.posicion || "", "Descripción": p.descripcion || "",
+      "Confianza": p.confianza || "", "Disponible": p.sold ? "Vendido" : "Disponible", "Fecha": p.created_at ? new Date(p.created_at).toLocaleDateString("es-CL") : ""
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, catLabels[key]);
+    hasData = true;
+  });
+  if (!hasData) { toast("Sin datos para exportar"); return; }
+  XLSX.writeFile(wb, `catalogo-${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast("Excel descargado");
+}
+
+// ════════════════════════════════════════════
+// CONFIRM DIALOG
+// ════════════════════════════════════════════
+function showConfirm(title, msg, cb, danger) {
+  $("conf-title").textContent = title;
+  $("conf-msg").textContent = msg;
+  $("conf-ok").className = danger ? "btn-danger" : "btn-primary";
+  confirmCb = cb;
+  $("confirm-bg").style.display = "flex";
+}
+$("conf-ok").onclick = () => {
+  $("confirm-bg").style.display = "none";
+  if (confirmCb) { const fn = confirmCb; confirmCb = null; fn(); }
+};
+$("conf-cancel").onclick = () => { $("confirm-bg").style.display = "none"; confirmCb = null; };
+
+// ════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════
+let _toastTimer = null;
+function toast(msg, dur) {
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("on");
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove("on"), dur || 2500);
+}
+
+// ════════════════════════════════════════════
+// LIGHTBOX
+// ════════════════════════════════════════════
+function openLightbox(src) { $("lb-img").src = src; $("lightbox").classList.add("on"); }
+function closeLightbox() { $("lightbox").classList.remove("on"); $("lb-img").src = ""; }
+
+// ════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════
+function escH(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+
+// ════════════════════════════════════════════
+// REFRESH ALL
+// ════════════════════════════════════════════
+$("btn-refresh").onclick = async () => {
+  if (!authedOnly()) return;
+  await loadAdminConfig();
+  loadParts();
+  loadDevices();
+  slPage = 0;
+  loadScanLogs(false);
+  toast("Datos actualizados");
+};
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+window.addEventListener("load", async () => {
+  const valid = await checkSavedSession();
+  if (valid) {
+    authed = true;
+    document.getElementById("pw-gate").classList.add("gone");
+    loadAllData();
+  }
+  $("pw-input").focus();
+});
+</script>
+</body>
+</html>
