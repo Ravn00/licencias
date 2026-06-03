@@ -309,9 +309,9 @@ textarea.fld-in{resize:vertical;min-height:56px}
     <button class="filter-pill" data-f="avail" onclick="setCatFilter('avail')">Disponibles</button>
     <button class="filter-pill" data-f="sold" onclick="setCatFilter('sold')">Vendidas</button>
     <span style="flex:1"></span>
-    <button class="btn-ghost btn-sm" onclick="exportExcel()">Exportar Excel</button>
-    <button class="btn-ghost btn-sm" onclick="exportJSON()">Exportar JSON</button>
-    <button class="btn-ghost btn-sm" onclick="document.getElementById('json-import').click()">Importar JSON</button>
+    <button class="btn-ghost btn-sm" onclick="exportExcel()" title="Exportar el catálogo a Excel con fotos incluidas">Exportar Excel</button>
+    <button class="btn-ghost btn-sm" onclick="exportJSON()" title="Exportar el catálogo completo como archivo JSON de respaldo">Exportar JSON</button>
+    <button class="btn-ghost btn-sm" onclick="document.getElementById('json-import').click()" title="Importar un archivo JSON de respaldo para restaurar el catálogo">Importar JSON</button>
     <input type="file" id="json-import" accept=".json" style="display:none"/>
   </div>
   <div id="cat-stats" style="font-size:10px;color:var(--t4);margin-bottom:8px"></div>
@@ -329,7 +329,7 @@ textarea.fld-in{resize:vertical;min-height:56px}
       <div style="flex:1;position:relative">
         <input id="api-key-in" type="password" placeholder="Ingresa nueva API key"
           style="width:100%;background:var(--s2);border:1px solid var(--bdr2);color:var(--text);padding:8px 34px 8px 10px;border-radius:var(--r6);font-size:12px"/>
-        <button id="api-eye" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;display:flex;align-items:center;padding:0">
+        <button id="api-eye" title="Mostrar u ocultar la API key" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;display:flex;align-items:center;padding:0">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
       </div>
@@ -372,7 +372,7 @@ textarea.fld-in{resize:vertical;min-height:56px}
       <option value="success">Exitosos</option>
       <option value="error">Con error</option>
     </select>
-    <button class="btn-ghost btn-sm" id="sl-refresh">Refrescar</button>
+    <button class="btn-ghost btn-sm" id="sl-refresh" title="Recargar el historial de escaneos">Refrescar</button>
   </div>
   <div id="sl-stats" style="font-size:10px;color:var(--t4);margin-bottom:6px"></div>
   <div class="tbl-wrap">
@@ -383,7 +383,7 @@ textarea.fld-in{resize:vertical;min-height:56px}
   </div>
   <div id="sl-empty" style="display:none;padding:24px;text-align:center;color:var(--t4);font-size:12px">Sin escaneos registrados aún.</div>
   <div style="text-align:center;margin-top:10px">
-    <button class="btn-ghost btn-sm" id="sl-load-more">Cargar más</button>
+    <button class="btn-ghost btn-sm" id="sl-load-more" title="Cargar más registros del historial">Cargar más</button>
   </div>
 </div>
 
@@ -399,7 +399,7 @@ textarea.fld-in{resize:vertical;min-height:56px}
       <option value="update">Editadas</option>
       <option value="delete">Eliminadas</option>
     </select>
-    <button class="btn-ghost btn-sm" id="audit-refresh">Refrescar</button>
+    <button class="btn-ghost btn-sm" id="audit-refresh" title="Recargar el registro de auditoría">Refrescar</button>
   </div>
   <div class="tbl-wrap">
     <table>
@@ -409,7 +409,7 @@ textarea.fld-in{resize:vertical;min-height:56px}
   </div>
   <div id="audit-empty" style="display:none;padding:24px;text-align:center;color:var(--t4);font-size:12px">Sin cambios registrados aún.</div>
   <div style="text-align:center;margin-top:10px">
-    <button class="btn-ghost btn-sm" id="audit-load-more">Cargar más</button>
+    <button class="btn-ghost btn-sm" id="audit-load-more" title="Cargar más registros de auditoría">Cargar más</button>
   </div>
 </div>
 
