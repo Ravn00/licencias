@@ -431,6 +431,24 @@ textarea.fld-in{resize:vertical;min-height:56px}
       </div>
     </div>
   </div>
+  <div class="sec-title" style="margin-top:20px">Contraseña de administrador</div>
+  <div class="sec-sub">Cambia la contraseña del panel. Se guarda en Supabase como hash SHA-256.</div>
+  <div class="sec-card">
+    <div class="fld-group">
+      <div class="fld-row">
+        <label>Nueva contraseña</label>
+        <input class="fld-in" id="admin-pw-input" type="password" placeholder="Mínimo 6 caracteres"/>
+      </div>
+      <div class="fld-row">
+        <label>Confirmar</label>
+        <input class="fld-in" id="admin-pw-confirm" type="password" placeholder="Repite la contraseña"/>
+      </div>
+      <div class="fld-row">
+        <label></label>
+        <button class="btn-primary btn-sm" id="admin-pw-save">Cambiar contraseña</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- LICENSE CONTENT -->
@@ -562,7 +580,8 @@ const SB_KEY = "sb_publishable_1Asg-FYNLYby-n-upo5NAg_z6ZJ4TTx";
 // ---
 // PASSWORD GATE
 // ---
-const PW_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"; // SHA-256 of "admin"
+const PW_HASH_FALLBACK = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"; // SHA-256 of "admin"
+let adminPasswordHash = PW_HASH_FALLBACK;
 let authed = false;
 
 function authedOnly() { if (!authed) { window.location.reload(); return false; } return true; }
@@ -619,7 +638,7 @@ async function doLogin() {
   const pw = document.getElementById("pw-input").value;
   const errEl = document.getElementById("pw-error");
   const hash = await getHash(pw);
-  if (hash !== PW_HASH) {
+  if (hash !== adminPasswordHash) {
     errEl.textContent = "Contraseña incorrecta";
     document.getElementById("pw-input").value = "";
     return;
@@ -734,6 +753,21 @@ function rebindModalHandlers(name) {
     const sav = body.querySelector("#maint-save");
     if (tog && lbl) tog.onclick = () => { tog.classList.toggle("on"); lbl.textContent = tog.classList.contains("on") ? "Mantenimiento activado" : "Mantenimiento desactivado"; };
     if (sav) sav.onclick = async () => { if (!authedOnly()) return; await updateAdminConfig({ maintenance_mode: tog?.classList.contains("on") || false, maintenance_message: msg?.value.trim() || "" }); toast("Configuración guardada"); };
+    // Password change
+    const pwInp = body.querySelector("#admin-pw-input");
+    const pwCfm = body.querySelector("#admin-pw-confirm");
+    const pwSav = body.querySelector("#admin-pw-save");
+    if (pwSav) pwSav.onclick = async () => {
+      if (!authedOnly()) return;
+      const v = pwInp?.value;
+      if (!v || v.length < 6) { toast("La contraseña debe tener al menos 6 caracteres"); return; }
+      if (v !== pwCfm?.value) { toast("Las contraseñas no coinciden"); return; }
+      const h = await getHash(v);
+      await updateAdminConfig({ password_hash: h });
+      if (pwInp) pwInp.value = "";
+      if (pwCfm) pwCfm.value = "";
+      toast("Contraseña actualizada");
+    };
     // Restore state
     if (adminConfig) {
       if (adminConfig.maintenance_mode && tog) { tog.classList.add("on"); if(lbl) lbl.textContent = "Mantenimiento activado"; }
@@ -811,6 +845,8 @@ async function loadAdminConfig() {
         try { adminConfig.api_keys = JSON.parse(adminConfig.api_keys); } catch(_) { adminConfig.api_keys = []; }
       }
       if (!Array.isArray(adminConfig.api_keys)) adminConfig.api_keys = [];
+      if (adminConfig.password_hash) adminPasswordHash = adminConfig.password_hash;
+      else adminPasswordHash = PW_HASH_FALLBACK;
     } else { adminConfig = null; }
   } catch(e) { console.warn("loadAdminConfig:", e); adminConfig = null; }
   return adminConfig;
