@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>Panel - Desarmaduria Paola</title>
 <meta name="theme-color" content="#0D0F12"/>
 <meta name="mobile-web-app-capable" content="yes"/>
@@ -29,14 +29,15 @@ html{background:var(--bg)}
 body{
   background:var(--bg);color:var(--text);font-family:var(--font-mono);
   font-size:13px;font-weight:400;min-height:100vh;
-  -webkit-tap-highlight-color:transparent;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
   padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
 }
 ::-webkit-scrollbar{width:2px;height:2px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--s4);border-radius:2px}
-button{font-family:var(--font-mono);cursor:pointer;border:none;outline:none}
-input,select,textarea{font-family:var(--font-mono);outline:none}
+button{font-family:var(--font-mono);cursor:pointer;border:none}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+input,select,textarea{font-family:var(--font-mono)}
 a{color:var(--gold)}
 
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -44,6 +45,7 @@ a{color:var(--gold)}
 @keyframes pulse-gold{0%,100%{opacity:1}50%{opacity:.5}}
 @keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes overlayIn{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
 /* --- */
 #pw-gate{position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
@@ -82,7 +84,7 @@ a{color:var(--gold)}
 @media(max-width:400px){#home .hg .tb-btn{font-size:9px;padding:6px 9px;flex:1;min-width:80px}}
 
 /* --- */
-.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;padding:60px 16px 16px;overflow-y:auto;animation:overlayIn .15s ease}
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;padding:60px 16px 16px;overflow-y:auto;animation:overlayIn .15s ease;overscroll-behavior:contain}
 .modal-overlay.on{display:flex}
 .modal-frame{background:var(--s1);border:1px solid var(--bdr2);border-radius:var(--r12);width:100%;max-width:min(92vw,820px);max-height:calc(100vh - 80px);display:flex;flex-direction:column;animation:modalIn .2s ease;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .modal-frame.wide{max-width:min(96vw,1060px)}
@@ -91,6 +93,7 @@ a{color:var(--gold)}
 .modal-title{font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--text);flex:1}
 .modal-close{background:none;border:none;color:var(--t4);font-size:20px;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:var(--r6);transition:all .2s}
 .modal-close:hover{background:var(--s3);color:var(--text)}
+.modal-close:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .modal-body{padding:16px;overflow-y:auto;flex:1;min-height:100px}
 .modal-empty{padding:40px 20px;text-align:center;color:var(--t4);font-size:12px;line-height:1.6}
 .modal-full{max-width:100%;margin:0;border-radius:0;min-height:100vh;max-height:100vh}
@@ -244,33 +247,33 @@ textarea.fld-in{resize:vertical;min-height:56px}
 <div id="toolbar" style="display:none">
   <div class="tb-row">
     <div class="tb-brand">
-      <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span>Desarmaduría Paola</span>
     </div>
     <div class="tb-actions" id="tb-actions">
       <button class="tb-btn" onclick="openModal('catalog')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Catálogo<span class="cnt" id="c-catalog">0</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Catálogo<span class="cnt" id="c-catalog">0</span>
       </button>
       <button class="tb-btn" onclick="openModal('apikeys')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys
       </button>
       <button class="tb-btn" onclick="openModal('devices')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1h6"/><path d="M9 23h6"/><path d="M12 21v-2"/></svg>Dispositivos<span class="cnt" id="c-devices">0</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1h6"/><path d="M9 23h6"/><path d="M12 21v-2"/></svg>Dispositivos<span class="cnt" id="c-devices">0</span>
       </button>
       <button class="tb-btn" onclick="openModal('scanlog')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Historial
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Historial
       </button>
       <button class="tb-btn" onclick="openModal('messages')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes
       </button>
       <button class="tb-btn" onclick="openModal('maintenance')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Mantenimiento
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Mantenimiento
       </button>
       <button class="tb-btn" onclick="openModal('license')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Licencias
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Licencias
       </button>
       <button class="tb-btn" onclick="openModal('diagnostics')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Diagnóstico
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Diagnóstico
       </button>
     </div>
   </div>
@@ -283,15 +286,15 @@ textarea.fld-in{resize:vertical;min-height:56px}
     <div class="ht">Panel de Administración</div>
     <div class="hs">Selecciona una sección para comenzar. Todos los cambios se sincronizan automáticamente con los dispositivos CAPv2.</div>
     <div class="hg">
-      <button class="tb-btn" onclick="openModal('catalog')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Catálogo</button>
-      <button class="tb-btn" onclick="openModal('apikeys')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys</button>
-      <button class="tb-btn" onclick="openModal('devices')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1h6"/><path d="M9 23h6"/><path d="M12 21v-2"/></svg>Dispositivos</button>
-      <button class="tb-btn" onclick="openModal('scanlog')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Historial</button>
-<button class="tb-btn" onclick="openModal('audit')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Auditoría</button>
-      <button class="tb-btn" onclick="openModal('messages')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes</button>
-      <button class="tb-btn" onclick="openModal('maintenance')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Mantenimiento</button>
-      <button class="tb-btn" onclick="openModal('license')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Licencias</button>
-      <button class="tb-btn" onclick="openModal('diagnostics')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Diagnóstico</button>
+      <button class="tb-btn" onclick="openModal('catalog')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Catálogo</button>
+      <button class="tb-btn" onclick="openModal('apikeys')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys</button>
+      <button class="tb-btn" onclick="openModal('devices')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1h6"/><path d="M9 23h6"/><path d="M12 21v-2"/></svg>Dispositivos</button>
+      <button class="tb-btn" onclick="openModal('scanlog')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Historial</button>
+<button class="tb-btn" onclick="openModal('audit')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Auditoría</button>
+      <button class="tb-btn" onclick="openModal('messages')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes</button>
+      <button class="tb-btn" onclick="openModal('maintenance')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Mantenimiento</button>
+      <button class="tb-btn" onclick="openModal('license')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Licencias</button>
+      <button class="tb-btn" onclick="openModal('diagnostics')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Diagnóstico</button>
     </div>
   </div>
 </div>
@@ -300,11 +303,11 @@ textarea.fld-in{resize:vertical;min-height:56px}
 <div id="content-catalog" style="display:none">
   <div class="sec-title">Catálogo de partes</div>
   <div class="sec-sub">Vista general de todas las partes escaneadas desde los dispositivos CAPv2.</div>
-  <input class="search-bar" id="cat-search" placeholder="Buscar por marca, modelo, años..."/>
+  <input class="search-bar" id="cat-search" placeholder="Buscar por marca, modelo, años…"/>
   <div class="cat-tools">
-    <span class="filter-pill on" data-f="all" onclick="setCatFilter('all')">Todas</span>
-    <span class="filter-pill" data-f="avail" onclick="setCatFilter('avail')">Disponibles</span>
-    <span class="filter-pill" data-f="sold" onclick="setCatFilter('sold')">Vendidas</span>
+    <button class="filter-pill on" data-f="all" onclick="setCatFilter('all')">Todas</button>
+    <button class="filter-pill" data-f="avail" onclick="setCatFilter('avail')">Disponibles</button>
+    <button class="filter-pill" data-f="sold" onclick="setCatFilter('sold')">Vendidas</button>
     <span style="flex:1"></span>
     <button class="btn-ghost btn-sm" onclick="exportExcel()">Exportar Excel</button>
     <button class="btn-ghost btn-sm" onclick="exportJSON()">Exportar JSON</button>
@@ -577,7 +580,7 @@ textarea.fld-in{resize:vertical;min-height:56px}
   <div class="modal-frame" id="modal-frame" onclick="event.stopPropagation()">
     <div class="modal-top">
       <span class="modal-title" id="modal-title"></span>
-      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <button class="modal-close" onclick="closeModal()" aria-label="Cerrar">&times;</button>
     </div>
     <div class="modal-body" id="modal-body"></div>
   </div>
