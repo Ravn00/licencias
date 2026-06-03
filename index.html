@@ -278,7 +278,7 @@ textarea.fld-in{resize:vertical;min-height:56px}
   <div class="hw">
     <div class="hi">&#9881;</div>
     <div class="ht">Panel de AdministraciÃ³n</div>
-    <div class="hs">SeleccionÃ¡ una secciÃ³n para comenzar. Todos los cambios se sincronizan automÃ¡ticamente con los dispositivos CAPv2.</div>
+    <div class="hs">Selecciona una secciÃ³n para comenzar. Todos los cambios se sincronizan automÃ¡ticamente con los dispositivos CAPv2.</div>
     <div class="hg">
       <button class="tb-btn" onclick="openModal('catalog')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>CatÃ¡logo</button>
       <button class="tb-btn" onclick="openModal('apikeys')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys</button>
@@ -340,7 +340,7 @@ textarea.fld-in{resize:vertical;min-height:56px}
 <!-- DEVICES CONTENT -->
 <div id="content-devices" style="display:none">
   <div class="sec-title">Dispositivos conectados</div>
-  <div class="sec-sub">Monitorea los dispositivos que ejecutan CAPv2. PodÃ©s bloquear o eliminar dispositivos.</div>
+  <div class="sec-sub">Monitorea los dispositivos que ejecutan CAPv2. Puedes bloquear o eliminar dispositivos.</div>
   <div class="dev-table-wrap">
     <table>
       <thead><tr><th>Dispositivo</th><th>Nombre</th><th>Ãšltima conexiÃ³n</th><th>Escaneos</th><th>Estado</th><th>AcciÃ³n</th></tr></thead>
@@ -474,7 +474,7 @@ textarea.fld-in{resize:vertical;min-height:56px}
     </div>
   </div>
   <div class="sec-title" style="margin-top:20px">Generar cÃ³digo de acceso</div>
-  <div class="sec-sub">GenerÃ¡ un cÃ³digo con formato <strong>AP-XXXX-MMAA-XXXXXXXX</strong> para cada usuario de CAPv2.</div>
+  <div class="sec-sub">Genera un cÃ³digo con formato <strong>AP-XXXX-MMAA-XXXXXXXX</strong> para cada usuario de CAPv2.</div>
   <div class="sec-card">
     <div class="fld-group">
       <div class="fld-row">
@@ -605,16 +605,19 @@ function sha256(str) {
   return H.map(x => ("0123456789abcdef").split("").reduce((s, _, i) => s + "0123456789abcdef"[(x >>> (7 - i) * 4) & 15], "")).join("");
 }
 
+async function getHash(str) {
+  try {
+    if (crypto.subtle) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("");
+    }
+  } catch(_) {}
+  return sha256(str);
+}
 async function doLogin() {
   const pw = document.getElementById("pw-input").value;
   const errEl = document.getElementById("pw-error");
-  let hash;
-  try {
-    if (crypto.subtle) {
-      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pw));
-      hash = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("");
-    } else { throw 1; }
-  } catch(e) { hash = sha256(pw); }
+  const hash = await getHash(pw);
   if (hash !== PW_HASH) {
     errEl.textContent = "ContraseÃ±a incorrecta";
     document.getElementById("pw-input").value = "";
@@ -1191,7 +1194,7 @@ async function diagRunHandler() {
     { label: "Tabla scan_log", run: async () => { const d = await sbFetch("/rest/v1/scan_log?select=id&limit=1", "GET"); return { ok: Array.isArray(d), detail: Array.isArray(d) ? "OK" : "No es un array" }; } },
     { label: "Tabla partes", run: async () => { const d = await sbFetch("/rest/v1/partes?select=id&limit=1", "GET"); return { ok: Array.isArray(d), detail: Array.isArray(d) ? "OK" : "No es un array" }; } },
     { label: "Storage bucket Fotos", run: async () => { const r = await fetch(`${SB_URL}/storage/v1/object/list/Fotos`, { method: "POST", headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json" }, body: JSON.stringify({ limit: 1, offset: 0 }) }); const txt = await r.text(); let detail = r.status + " " + r.statusText; if (!r.ok) try { const j = JSON.parse(txt); detail = j.error || detail; } catch(e) {} return { ok: r.ok, detail }; } },
-    { label: "API Keys configuradas", run: async () => { const k = adminConfig?.api_keys || []; return { ok: k.length > 0, detail: k.length > 0 ? `${k.length} key(s)` : "Sin keys â€” agregÃ¡ al menos una" }; } },
+    { label: "API Keys configuradas", run: async () => { const k = adminConfig?.api_keys || []; return { ok: k.length > 0, detail: k.length > 0 ? `${k.length} key(s)` : "Sin keys â€” agrega al menos una" }; } },
     { label: "Config de IA (modelo)", run: async () => { const m = adminConfig?.ai_model || ""; return { ok: !!m, detail: m || "Sin modelo configurado" }; } },
   ];
 
