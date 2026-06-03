@@ -1,4 +1,4 @@
-﻿﻿﻿<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
@@ -1276,7 +1276,7 @@ function showConfirm(title, msg, cb, danger) {
   confirmCb = cb;
   $("confirm-bg").style.display = "flex";
 }
-$("conf-ok").onclick = () => {
+$("conf-ok").onclick = async () => {
   $("confirm-bg").style.display = "none";
   if (confirmCb) { const fn = confirmCb; confirmCb = null; await fn(); }
 };
