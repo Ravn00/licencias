@@ -365,6 +365,7 @@ textarea.fld-in{resize:vertical;min-height:56px}
     </select>
     <button class="btn-ghost btn-sm" id="sl-refresh">Refrescar</button>
   </div>
+  <div id="sl-stats" style="font-size:10px;color:var(--t4);margin-bottom:6px"></div>
   <div class="tbl-wrap">
     <table>
       <thead><tr><th>Hora</th><th>Dispositivo</th><th>Parte ID</th><th>Categoría</th><th>Resultado</th><th>Latencia</th></tr></thead>
@@ -670,6 +671,7 @@ let catSearch = "";
 let slSearch = "";
 let slFilter = "all";
 let slPage = 0;
+let slTotal = 0;
 const SL_PAGE_SIZE = 50;
 
 let confirmCb = null;
@@ -906,7 +908,11 @@ async function loadScanLogs(append) {
     const offset = append ? slPage * SL_PAGE_SIZE : 0;
     const params = `/rest/v1/scan_log?select=*&order=timestamp.desc&limit=${SL_PAGE_SIZE}&offset=${offset}`;
     const data = await sbFetch(params, "GET");
-    if (!append) { scanLogs = data || []; } else { scanLogs = scanLogs.concat(data || []); }
+    if (!append) {
+      scanLogs = data || [];
+      const countRes = await fetch(`${SB_URL}/rest/v1/scan_log?select=id&limit=0`, { headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Prefer": "count=exact" } });
+      if (countRes.ok) slTotal = parseInt(countRes.headers.get("content-range")?.split("/")[1] || countRes.headers.get("x-total-count") || "0", 10) || 0;
+    } else { scanLogs = scanLogs.concat(data || []); }
     slPage = append ? slPage + 1 : 1;
     if (isModalOpen("scanlog")) renderScanLogInModal();
   } catch(e) { console.error("loadScanLogs:", e); toast("Error al cargar historial"); }
@@ -1162,6 +1168,9 @@ function renderScanLogInModal() {
     filtered = filtered.filter(l => l.part_id?.includes(q) || l.device_id?.includes(q));
   }
   if (slFilter !== "all") filtered = filtered.filter(l => l.resultado === slFilter);
+
+  const stats = body.querySelector("#sl-stats");
+  if (stats) stats.textContent = slTotal > 0 ? `${scanLogs.length} cargados de ${slTotal} totales` : `${scanLogs.length} registros cargados`;
 
   if (filtered.length === 0) { tbody.innerHTML = ""; if (empty && allLoaded) empty.style.display = "block"; return; }
   if (empty) empty.style.display = "none";
