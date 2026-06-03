@@ -1718,13 +1718,13 @@ async function diagLicense() {
 
 async function diagCatalogStats() {
   try {
-    const all = await sbFetch("/rest/v1/partes?select=id,estado,categoria&limit=5000", "GET");
+    const all = await sbFetch("/rest/v1/partes?select=id,data&limit=5000", "GET");
     if (!Array.isArray(all)) return { status:"err", message:"No accesible" };
     const total = all.length;
-    const sold = all.filter(p => p.estado === "vendido" || p.estado === "sold").length;
+    const sold = all.filter(p => p.data && (p.data.sold === true || p.data.estado === "vendido")).length;
     const avail = total - sold;
     const cats = {};
-    all.forEach(p => { if (p.categoria) { cats[p.categoria] = (cats[p.categoria]||0)+1; } });
+    all.forEach(p => { const c = p.data?.categoria; if (c) { cats[c] = (cats[c]||0)+1; } });
     const catList = Object.entries(cats).sort((a,b) => b[1]-a[1]).slice(0,5).map(([c,n]) => `${c}:${n}`).join(", ");
     const detail = catList ? `Categorías: ${catList}` : "Sin categorías";
     return { status:"ok", message:`${total} total · ${avail} disp. · ${sold} vend.`, detail };
@@ -1735,10 +1735,10 @@ async function diagCatalogStats() {
 
 async function diagFotoSync() {
   try {
-    const parts = await sbFetch("/rest/v1/partes?select=id,foto_url&limit=5000", "GET");
+    const parts = await sbFetch("/rest/v1/partes?select=id,data&limit=5000", "GET");
     if (!Array.isArray(parts)) return { status:"err", message:"No accesible" };
     const total = parts.length;
-    const withFoto = parts.filter(p => p.foto_url && p.foto_url !== "").length;
+    const withFoto = parts.filter(p => p.data && p.data.photoUrl && p.data.photoUrl !== "").length;
     const without = total - withFoto;
     const pct = total ? ((withFoto/total)*100).toFixed(0) : "0";
     if (total === 0) return { status:"warn", message:"Catálogo vacío" };
@@ -1750,13 +1750,13 @@ async function diagFotoSync() {
 
 async function diagRLS() {
   try {
-    const testVal = "_diag_" + Date.now();
-    const enc = encodeURIComponent(testVal);
-    const ins = await sbFetch("/rest/v1/partes_log", "POST", { accion:"diag_rls", detalle:testVal, usuario:"sistema" });
+    const testId = "_diag_" + Date.now();
+    const enc = encodeURIComponent(testId);
+    const ins = await sbFetch("/rest/v1/partes_log", "POST", { action:"create", part_id:testId, changes:"{\"diag\":true}", device_id:"diag", timestamp:new Date().toISOString() });
     if (!ins) return { status:"err", message:"Inserción rechazada (RLS bloquea escritura)" };
-    const check = await sbFetch(`/rest/v1/partes_log?detalle=eq.${enc}&select=id&limit=1`, "GET");
+    const check = await sbFetch(`/rest/v1/partes_log?part_id=eq.${enc}&select=id&limit=1`, "GET");
     const ok = Array.isArray(check) && check.length > 0;
-    await sbFetch(`/rest/v1/partes_log?detalle=eq.${enc}`, "DELETE");
+    await sbFetch(`/rest/v1/partes_log?part_id=eq.${enc}`, "DELETE");
     if (ok) return { status:"ok", message:"Lectura/escritura OK" };
     return { status:"warn", message:"Escritura OK, pero no se pudo leer el registro de prueba" };
   } catch(e) {
