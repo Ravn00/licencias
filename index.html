@@ -77,14 +77,15 @@ a{color:var(--gold)}
 #home .hi{font-size:32px;margin-bottom:8px;opacity:.3}
 #home .ht{font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--t2);margin-bottom:4px}
 #home .hs{font-size:11px;color:var(--t4);line-height:1.6;margin-bottom:16px}
-#home .hg{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-#home .hg .tb-btn{font-size:10px;padding:8px 14px}
+#home .hg{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+#home .hg .tb-btn{font-size:10px;padding:7px 11px}
+@media(max-width:400px){#home .hg .tb-btn{font-size:9px;padding:6px 9px;flex:1;min-width:80px}}
 
 /* --- */
 .modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;padding:60px 16px 16px;overflow-y:auto;animation:overlayIn .15s ease}
 .modal-overlay.on{display:flex}
-.modal-frame{background:var(--s1);border:1px solid var(--bdr2);border-radius:var(--r12);width:100%;max-width:820px;max-height:calc(100vh - 80px);display:flex;flex-direction:column;animation:modalIn .2s ease;box-shadow:0 20px 60px rgba(0,0,0,.6)}
-.modal-frame.wide{max-width:1060px}
+.modal-frame{background:var(--s1);border:1px solid var(--bdr2);border-radius:var(--r12);width:100%;max-width:min(92vw,820px);max-height:calc(100vh - 80px);display:flex;flex-direction:column;animation:modalIn .2s ease;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-frame.wide{max-width:min(96vw,1060px)}
 .modal-top{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--bdr2);flex-shrink:0}
 .modal-top .md-ico{width:18px;height:18px;flex-shrink:0;fill:var(--gold)}
 .modal-title{font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--text);flex:1}
@@ -1287,13 +1288,16 @@ function exportExcel() {
   const wb = XLSX.utils.book_new();
   let hasData = false;
   // Collect uncategorized parts
+  const row = (p, i) => ({
+    "#": i + 1, "Archivo": p.fileName || p.id || "", "Marca": p.marca || "", "Modelo": p.modelo || "",
+    "Años": p.años || "", "Posición": p.posicion || "", "Descripción": p.descripcion || "",
+    "Confianza": p.confianza || "", "Estado": p.sold ? "Vendido" : "Disponible",
+    "Foto URL": p.photoUrl && p.photoUrl.startsWith("http") ? p.photoUrl : "",
+    "Fecha": p.created_at ? new Date(p.created_at).toLocaleDateString("es-CL") : ""
+  });
   const uncategorized = parts.filter(p => !catOrder.includes(p.categoria));
   if (uncategorized.length) {
-    const rows = uncategorized.map((p, i) => ({
-      "#": i + 1, "Archivo": p.fileName || p.id || "", "Marca": p.marca || "", "Modelo": p.modelo || "",
-      "Años": p.años || "", "Posición": p.posicion || "", "Descripción": p.descripcion || "",
-      "Confianza": p.confianza || "", "Estado": p.sold ? "Vendido" : "Disponible", "Fecha": p.created_at ? new Date(p.created_at).toLocaleDateString("es-CL") : ""
-    }));
+    const rows = uncategorized.map(row);
     const ws = XLSX.utils.json_to_sheet(rows);
     XLSX.utils.book_append_sheet(wb, ws, "Otros");
     hasData = true;
@@ -1301,11 +1305,7 @@ function exportExcel() {
   catOrder.forEach(key => {
     const items = parts.filter(p => p.categoria === key);
     if (!items.length) return;
-    const rows = items.map((p, i) => ({
-      "#": i + 1, "Archivo": p.fileName || p.id || "", "Marca": p.marca || "", "Modelo": p.modelo || "",
-      "Años": p.años || "", "Posición": p.posicion || "", "Descripción": p.descripcion || "",
-      "Confianza": p.confianza || "", "Estado": p.sold ? "Vendido" : "Disponible", "Fecha": p.created_at ? new Date(p.created_at).toLocaleDateString("es-CL") : ""
-    }));
+    const rows = items.map(row);
     const ws = XLSX.utils.json_to_sheet(rows);
     XLSX.utils.book_append_sheet(wb, ws, catLabels[key]);
     hasData = true;
