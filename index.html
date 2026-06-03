@@ -817,18 +817,19 @@ async function loadAdminConfig() {
 }
 
 async function upsertAdminConfig(payload) {
-  payload.id = "global";
+  delete payload.id;
+  const qs = "id=eq.global";
   const opts = {
-    method: "POST",
+    method: "PATCH",
     headers: {
       "apikey": SB_KEY,
       "Authorization": `Bearer ${SB_KEY}`,
       "Content-Type": "application/json",
-      "Prefer": "resolution=merge-duplicates"
+      "Prefer": "return=minimal"
     },
     body: JSON.stringify(payload)
   };
-  const res = await fetch(SB_URL + "/rest/v1/admin_config", opts);
+  const res = await fetch(SB_URL + "/rest/v1/admin_config?" + qs, opts);
   if (!res.ok) { const t = await res.text(); throw new Error(`HTTP ${res.status}: ${t.slice(0,100)}`); }
 }
 
@@ -1189,12 +1190,12 @@ async function diagRunHandler() {
   if (logEl) { logEl.style.display = "none"; logEl.textContent = ""; }
 
   const tests = [
-    { label: "Conexión a Supabase REST", run: async () => { const r = await fetch(SB_URL + "/rest/v1/", { headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY } }); return { ok: r.ok, detail: r.status + " " + r.statusText }; } },
+    { label: "Conexión a Supabase REST", run: async () => { const r = await fetch(SB_URL + "/rest/v1/admin_config?select=id&limit=1", { headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY } }); const txt = await r.text(); let detail = r.status + " " + r.statusText; if (r.ok) try { const j = JSON.parse(txt); detail = Array.isArray(j) ? "OK (" + j.length + " filas)" : "Respuesta inesperada"; } catch(e) { detail = txt; } return { ok: r.ok, detail }; } },
     { label: "Tabla admin_config", run: async () => { const d = await sbFetch("/rest/v1/admin_config?select=id&limit=1", "GET"); return { ok: Array.isArray(d), detail: Array.isArray(d) ? "OK" : "No es un array" }; } },
     { label: "Tabla dispositivos", run: async () => { const d = await sbFetch("/rest/v1/devices?select=id&limit=1", "GET"); return { ok: Array.isArray(d), detail: Array.isArray(d) ? "OK" : "No es un array" }; } },
     { label: "Tabla scan_log", run: async () => { const d = await sbFetch("/rest/v1/scan_log?select=id&limit=1", "GET"); return { ok: Array.isArray(d), detail: Array.isArray(d) ? "OK" : "No es un array" }; } },
     { label: "Tabla partes", run: async () => { const d = await sbFetch("/rest/v1/partes?select=id&limit=1", "GET"); return { ok: Array.isArray(d), detail: Array.isArray(d) ? "OK" : "No es un array" }; } },
-    { label: "Storage bucket Fotos", run: async () => { const r = await fetch(`${SB_URL}/storage/v1/object/list/Fotos`, { method: "POST", headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json" }, body: JSON.stringify({ limit: 1, offset: 0 }) }); const txt = await r.text(); let detail = r.status + " " + r.statusText; if (!r.ok) try { const j = JSON.parse(txt); detail = j.error || detail; } catch(e) {} return { ok: r.ok, detail }; } },
+    { label: "Storage bucket Fotos", run: async () => { const r = await fetch(`${SB_URL}/storage/v1/object/public/Fotos/.keep`, { method: "HEAD", headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY } }); return { ok: r.ok || r.status === 404, detail: r.ok ? "Bucket accesible" : r.status === 404 ? "Bucket OK (sin archivo .keep)" : r.status + " " + r.statusText }; } },
     { label: "API Keys configuradas", run: async () => { const k = adminConfig?.api_keys || []; return { ok: k.length > 0, detail: k.length > 0 ? `${k.length} key(s)` : "Sin keys — agrega al menos una" }; } },
     { label: "Config de IA (modelo)", run: async () => { const m = adminConfig?.ai_model || ""; return { ok: !!m, detail: m || "Sin modelo configurado" }; } },
   ];
