@@ -209,6 +209,66 @@ textarea.fld-in{resize:vertical;min-height:56px}
 .diag-log{display:none;background:var(--s2);border:1px solid var(--bdr2);border-radius:var(--r6);padding:8px;font-size:11px;color:var(--t3);font-family:monospace;white-space:pre-wrap;max-height:160px;overflow-y:auto;margin-bottom:10px}
 
 /* --- */
+:root.light{
+  --bg:#F5F5F0;--s1:#FFFFFF;--s2:#F0EFEA;--s3:#E4E3DE;--s4:#D4D3CE;
+  --text:#1A1A18;--t2:#4A4A46;--t3:#7A7A76;--t4:#A0A09C;--t5:#C4C4C0;
+  --bdr:#E0DFDA;--bdr2:#D0CFCA;--bdr3:#C0BFBA;
+  --gold:#B8923E;--gold-dim:rgba(184,146,62,.1);
+  --card-shadow:0 1px 3px rgba(0,0,0,.06);
+  --card-shadow-hover:0 4px 12px rgba(0,0,0,.1);
+}
+body{transition:background .3s,color .3s}
+
+/* --- Sidebar Layout --- */
+#app-layout{display:flex;min-height:100vh}
+#sidebar{width:220px;background:var(--s1);border-right:1px solid var(--bdr2);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:100;animation:fadeIn .2s ease}
+#sidebar-brand{display:flex;align-items:center;gap:8px;padding:16px 14px;border-bottom:1px solid var(--bdr)}
+#sidebar-brand svg{width:18px;height:18px;fill:var(--gold);flex-shrink:0}
+#sidebar-brand span{font-family:var(--font-display);font-weight:800;font-size:13px;letter-spacing:-.3px;color:var(--text)}
+#sidebar-nav{flex:1;padding:8px}
+.snav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r8);color:var(--t3);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;text-decoration:none;border:none;background:none;width:100%;text-align:left;font-family:var(--font-mono)}
+.snav-item:hover{background:var(--s2);color:var(--t2)}
+.snav-item.active{background:var(--gold-dim);color:var(--gold)}
+.snav-item svg{width:16px;height:16px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.snav-item .scnt{margin-left:auto;background:var(--s3);border-radius:6px;padding:0 6px;font-size:9px;line-height:16px;min-width:16px;text-align:center;color:var(--t4)}
+#sidebar-footer{border-top:1px solid var(--bdr);padding:8px;display:flex;flex-direction:column;gap:4px}
+#sidebar-theme{background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r8);padding:8px 12px;color:var(--t3);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:var(--font-mono);transition:all .15s}
+#sidebar-theme:hover{background:var(--s3);color:var(--t2)}
+#sidebar-theme svg{width:14px;height:14px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5}
+#main-area{flex:1;min-width:0;padding:20px;display:flex;flex-direction:column}
+
+/* --- Dashboard Stats --- */
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.dash-card{background:var(--s1);border:1px solid var(--bdr2);border-radius:var(--r12);padding:18px 16px;text-align:center;transition:all .2s;animation:fadeUp .25s ease;box-shadow:var(--card-shadow)}
+.dash-card:hover{box-shadow:var(--card-shadow-hover);border-color:var(--bdr3)}
+.dash-card:nth-child(2){animation-delay:.05s}
+.dash-card:nth-child(3){animation-delay:.1s}
+.dash-card:nth-child(4){animation-delay:.15s}
+.dash-val{font-family:var(--font-display);font-weight:700;font-size:28px;line-height:1;letter-spacing:-.5px;margin-bottom:4px}
+.dash-val.gold{color:var(--gold)}
+.dash-val.green{color:var(--green-lt)}
+.dash-val.sold{color:var(--sold-lt)}
+.dash-val.default{color:var(--text)}
+.dash-label{font-size:9px;color:var(--t4);letter-spacing:1px;text-transform:uppercase}
+.dash-sub{font-size:10px;color:var(--t4);margin-top:3px}
+
+/* --- Dashboard Section Links --- */
+.dash-sections{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:8px}
+.dash-section-btn{background:var(--s1);border:1px solid var(--bdr2);border-radius:var(--r10);padding:14px 12px;text-align:center;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:6px;animation:fadeUp .3s ease}
+.dash-section-btn:hover{box-shadow:var(--card-shadow-hover);border-color:var(--bdr3);transform:translateY(-2px)}
+.dash-section-btn svg{width:20px;height:20px;color:var(--gold);fill:none;stroke:currentColor;stroke-width:1.5}
+.dash-section-btn .ds-label{font-size:11px;font-weight:600;color:var(--t2);line-height:1.2}
+.dash-section-btn .ds-sub{font-size:9px;color:var(--t4);line-height:1.3}
+
+/* --- Sidebar responsive --- */
+@media(max-width:768px){
+  #sidebar{width:56px}
+  #sidebar-brand span,#sidebar-nav .snav-item span:not(.scnt),#sidebar-footer span,#sidebar-theme span{display:none}
+  #sidebar-nav .snav-item{justify-content:center;padding:10px}
+  #sidebar-theme{justify-content:center;padding:10px}
+  #sidebar-brand{padding:14px 10px;justify-content:center}
+  #sidebar-footer .snav-item{justify-content:center;padding:10px}
+}
 @media(max-width:600px){
   .tb-row{height:auto;padding:6px 8px;flex-wrap:wrap;gap:4px}
   .tb-brand span{font-size:11px}
@@ -223,6 +283,12 @@ textarea.fld-in{resize:vertical;min-height:56px}
   .fld-row{flex-direction:column;align-items:stretch;gap:4px}
   .fld-row label{min-width:0;font-size:10px}
   .cat-grid{grid-template-columns:1fr}
+  .dash-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .dash-val{font-size:22px}
+  .dash-sections{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+  #sidebar{width:48px}
+  #sidebar-brand{padding:10px 6px}
+  #sidebar-nav{padding:4px}
 }
 @media(min-width:601px){
   .dev-grid{display:none}
@@ -243,61 +309,147 @@ textarea.fld-in{resize:vertical;min-height:56px}
   </div>
 </div>
 
-<!-- TOOLBAR -->
-<div id="toolbar" style="display:none">
-  <div class="tb-row">
-    <div class="tb-brand">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span>Desarmaduría Paola</span>
+<!-- APP LAYOUT (hidden until login) -->
+<div id="app-layout" style="display:none">
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="sidebar-inner" style="display:flex;flex-direction:column;height:100%">
+      <div id="sidebar-brand">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Desarmaduría Paola</span>
+      </div>
+      <div id="sidebar-nav">
+        <button class="snav-item" onclick="openModal('catalog')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          <span>Catálogo</span><span class="scnt" id="c-catalog">0</span>
+        </button>
+        <button class="snav-item" onclick="openModal('apikeys')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          <span>API Keys</span>
+        </button>
+        <button class="snav-item" onclick="openModal('devices')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1h6"/><path d="M9 23h6"/><path d="M12 21v-2"/></svg>
+          <span>Dispositivos</span><span class="scnt" id="c-devices">0</span>
+        </button>
+        <button class="snav-item" onclick="openModal('scanlog')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span>Historial</span>
+        </button>
+        <button class="snav-item" onclick="openModal('audit')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Auditoría</span>
+        </button>
+        <button class="snav-item" onclick="openModal('messages')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Mensajes</span>
+        </button>
+        <button class="snav-item" onclick="openModal('maintenance')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          <span>Mantenimiento</span>
+        </button>
+        <button class="snav-item" onclick="openModal('license')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>Licencias</span>
+        </button>
+        <button class="snav-item" onclick="openModal('diagnostics')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span>Diagnóstico</span>
+        </button>
+      </div>
+      <div id="sidebar-footer">
+        <button id="sidebar-theme" aria-label="Cambiar tema" title="Cambiar tema">
+          <svg viewBox="0 0 24 24" id="side-theme-icon" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <span>Tema</span>
+        </button>
+        <button class="snav-item" onclick="refreshAll()" style="font-size:10px;color:var(--t4)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36"/></svg>
+          <span>Sincronizar</span>
+        </button>
+      </div>
     </div>
-    <div class="tb-actions" id="tb-actions">
-      <button class="tb-btn" onclick="openModal('catalog')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Catálogo<span class="cnt" id="c-catalog">0</span>
-      </button>
-      <button class="tb-btn" onclick="openModal('apikeys')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys
-      </button>
-      <button class="tb-btn" onclick="openModal('devices')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1h6"/><path d="M9 23h6"/><path d="M12 21v-2"/></svg>Dispositivos<span class="cnt" id="c-devices">0</span>
-      </button>
-      <button class="tb-btn" onclick="openModal('scanlog')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Historial
-      </button>
-      <button class="tb-btn" onclick="openModal('messages')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes
-      </button>
-      <button class="tb-btn" onclick="openModal('maintenance')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Mantenimiento
-      </button>
-      <button class="tb-btn" onclick="openModal('license')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Licencias
-      </button>
-      <button class="tb-btn" onclick="openModal('diagnostics')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Diagnóstico
-      </button>
+  </nav>
+
+  <!-- MAIN CONTENT AREA -->
+  <div id="main-area">
+    <!-- HOME / DASHBOARD -->
+    <div id="home">
+      <div style="max-width:100%">
+        <div style="margin-bottom:20px">
+          <h1 style="font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:-.5px;color:var(--text);margin-bottom:4px">Panel de Administración</h1>
+          <p style="font-size:12px;color:var(--t3);line-height:1.6">Monitor general del sistema. Todos los datos se sincronizan automáticamente con los dispositivos CAPv2.</p>
+        </div>
+        <div class="dash-grid" id="dash-stats">
+          <div class="dash-card">
+            <div class="dash-val gold" id="dash-total">0</div>
+            <div class="dash-label">Partes totales</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-val green" id="dash-avail">0</div>
+            <div class="dash-label">Disponibles</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-val sold" id="dash-sold">0</div>
+            <div class="dash-label">Vendidas</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-val default" id="dash-devices">0</div>
+            <div class="dash-label">Dispositivos</div>
+            <div class="dash-sub" id="dash-active-devices">activos</div>
+          </div>
+        </div>
+        <div class="dash-sections">
+          <div class="dash-section-btn" onclick="openModal('catalog')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            <div class="ds-label">Catálogo</div>
+            <div class="ds-sub">Administrar partes</div>
+          </div>
+          <div class="dash-section-btn" onclick="openModal('apikeys')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            <div class="ds-label">API Keys</div>
+            <div class="ds-sub">Claves de IA</div>
+          </div>
+          <div class="dash-section-btn" onclick="openModal('devices')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1h6"/><path d="M9 23h6"/><path d="M12 21v-2"/></svg>
+            <div class="ds-label">Dispositivos</div>
+            <div class="ds-sub">Monitoreo</div>
+          </div>
+          <div class="dash-section-btn" onclick="openModal('scanlog')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <div class="ds-label">Historial</div>
+            <div class="ds-sub">Escaneos</div>
+          </div>
+          <div class="dash-section-btn" onclick="openModal('audit')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div class="ds-label">Auditoría</div>
+            <div class="ds-sub">Cambios</div>
+          </div>
+          <div class="dash-section-btn" onclick="openModal('messages')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <div class="ds-label">Mensajes</div>
+            <div class="ds-sub">Banner admin</div>
+          </div>
+          <div class="dash-section-btn" onclick="openModal('maintenance')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            <div class="ds-label">Mantenimiento</div>
+            <div class="ds-sub">Configuración</div>
+          </div>
+          <div class="dash-section-btn" onclick="openModal('license')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <div class="ds-label">Licencias</div>
+            <div class="ds-sub">IA y accesos</div>
+          </div>
+          <div class="dash-section-btn" onclick="openModal('diagnostics')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <div class="ds-label">Diagnóstico</div>
+            <div class="ds-sub">Verificar sistema</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- HOME (landing after login) -->
-<div id="home" style="display:none">
-  <div class="hw">
-    <div class="hi">&#9881;</div>
-    <div class="ht">Panel de Administración</div>
-    <div class="hs">Selecciona una sección para comenzar. Todos los cambios se sincronizan automáticamente con los dispositivos CAPv2.</div>
-    <div class="hg">
-      <button class="tb-btn" onclick="openModal('catalog')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Catálogo</button>
-      <button class="tb-btn" onclick="openModal('apikeys')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys</button>
-      <button class="tb-btn" onclick="openModal('devices')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1h6"/><path d="M9 23h6"/><path d="M12 21v-2"/></svg>Dispositivos</button>
-      <button class="tb-btn" onclick="openModal('scanlog')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Historial</button>
-<button class="tb-btn" onclick="openModal('audit')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Auditoría</button>
-      <button class="tb-btn" onclick="openModal('messages')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes</button>
-      <button class="tb-btn" onclick="openModal('maintenance')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Mantenimiento</button>
-      <button class="tb-btn" onclick="openModal('license')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Licencias</button>
-      <button class="tb-btn" onclick="openModal('diagnostics')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Diagnóstico</button>
-    </div>
-  </div>
-</div>
+
 
 <!-- CATALOG CONTENT -->
 <div id="content-catalog" style="display:none">
@@ -684,8 +836,7 @@ async function doLogin() {
   errEl.textContent = "";
   localStorage.setItem("ap_session", JSON.stringify({ exp: Date.now() + 86400000 }));
   document.getElementById("pw-gate").classList.add("gone");
-  document.getElementById("toolbar").style.display = "block";
-  document.getElementById("home").style.display = "flex";
+  document.getElementById("app-layout").style.display = "flex";
   loadAllData();
 }
 
@@ -935,6 +1086,7 @@ async function loadParts() {
       return p;
     });
     updateCatalogCount();
+    updateDashboardStats();
     if (isModalOpen("catalog")) renderCatalogInModal();
   } catch(e) { console.error("loadParts:", e); toast("Error al cargar catálogo"); }
 }
@@ -944,6 +1096,7 @@ async function loadDevices() {
     const data = await sbFetchAll("/rest/v1/devices?select=*&order=last_seen.desc");
     devices = data || [];
     updateDeviceCount();
+    updateDashboardStats();
     if (isModalOpen("devices")) renderDevicesInModal();
   } catch(e) { console.error("loadDevices:", e); toast("Error al cargar dispositivos"); }
 }
@@ -994,6 +1147,32 @@ async function deletePart(partId) {
 // ---
 function updateCatalogCount() { const el = document.getElementById("c-catalog"); if (el) el.textContent = parts.length; }
 function updateDeviceCount() { const el = document.getElementById("c-devices"); if (el) el.textContent = devices.length; }
+
+// ---
+// DASHBOARD STATS
+// ---
+function updateDashboardStats() {
+  const total = parts.length;
+  const avail = parts.filter(p => !p.sold).length;
+  const sold = parts.filter(p => p.sold).length;
+  const dTotal = document.getElementById("dash-total");
+  const dAvail = document.getElementById("dash-avail");
+  const dSold = document.getElementById("dash-sold");
+  const dDev = document.getElementById("dash-devices");
+  const dActive = document.getElementById("dash-active-devices");
+  if (dTotal) dTotal.textContent = total;
+  if (dAvail) dAvail.textContent = avail;
+  if (dSold) dSold.textContent = sold;
+  if (dDev) dDev.textContent = devices.length;
+  if (dActive) {
+    const activeCount = devices.filter(d => {
+      if (d.status === "blocked") return false;
+      if (!d.last_seen) return false;
+      return (Date.now() - new Date(d.last_seen.endsWith("Z")||d.last_seen.includes("+")?d.last_seen:d.last_seen+"Z").getTime()) < 300000;
+    }).length;
+    dActive.textContent = activeCount + " activos";
+  }
+}
 
 // ---
 // LOAD ALL DATA
@@ -1509,6 +1688,7 @@ function refreshAll() {
   loadDevices();
   slPage = 0;
   loadScanLogs(false);
+  updateDashboardStats();
   toast("Datos actualizados");
 }
 
@@ -1520,14 +1700,27 @@ window.addEventListener("load", async () => {
   if (valid) {
     authed = true;
     document.getElementById("pw-gate").classList.add("gone");
-    document.getElementById("toolbar").style.display = "block";
-    document.getElementById("home").style.display = "flex";
+    document.getElementById("app-layout").style.display = "flex";
     loadAllData();
   }
   $("pw-input").focus();
   // Unregister old SW to clear corrupt cache
   if ("serviceWorker" in navigator) navigator.serviceWorker.getRegistrations().then(r => r.forEach(r => r.unregister()));
+  // Theme restore
+  const stored = localStorage.getItem('ap_theme_panel');
+  if (stored === 'light') document.documentElement.classList.add('light');
 });
+
+// Theme toggle
+(function() {
+  const btn = document.getElementById('sidebar-theme');
+  const icon = document.getElementById('side-theme-icon');
+  if (!btn) return;
+  btn.onclick = () => {
+    const isLight = document.documentElement.classList.toggle('light');
+    localStorage.setItem('ap_theme_panel', isLight ? 'light' : 'dark');
+  };
+})();
 </script>
 </body>
 </html>
