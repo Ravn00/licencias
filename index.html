@@ -1752,16 +1752,16 @@ async function diagRLS() {
   try {
     const testId = "_diag_" + Date.now();
     const enc = encodeURIComponent(testId);
-    const ins = await sbFetch("/rest/v1/partes_log", "POST", { action:"create", part_id:testId, changes:"{\"diag\":true}", device_id:"diag", timestamp:new Date().toISOString() });
-    if (!ins) return { status:"err", message:"Inserción rechazada (RLS bloquea escritura)" };
+    await sbFetch("/rest/v1/partes_log", "POST", { action:"create", part_id:testId, changes:JSON.stringify({diag:true}), device_id:"diag", timestamp:new Date().toISOString() });
     const check = await sbFetch(`/rest/v1/partes_log?part_id=eq.${enc}&select=id&limit=1`, "GET");
     const ok = Array.isArray(check) && check.length > 0;
-    await sbFetch(`/rest/v1/partes_log?part_id=eq.${enc}`, "DELETE");
+    try { await sbFetch(`/rest/v1/partes_log?part_id=eq.${enc}`, "DELETE"); } catch(_) {}
     if (ok) return { status:"ok", message:"Lectura/escritura OK" };
-    return { status:"warn", message:"Escritura OK, pero no se pudo leer el registro de prueba" };
+    return { status:"warn", message:"El POST no arrojó error pero no se encontró el registro (quizás RLS bloquea SELECT)" };
   } catch(e) {
-    if (e.message && (e.message.includes("406") || e.message.includes("policy"))) return { status:"err", message:"RLS bloqueando: " + e.message };
-    return { status:"err", message:e.message || "Error al probar RLS" };
+    if (e.message && (e.message.includes("policy"))) return { status:"err", message:"RLS bloquea: " + e.message };
+    if (e.message && e.message.includes("PGRST204")) return { status:"err", message:"Tabla partes_log no existe o columnas incorrectas" };
+    return { status:"err", message:e.message || "Error desconocido" };
   }
 }
 
