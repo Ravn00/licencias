@@ -304,6 +304,9 @@ textarea.fld-in{resize:vertical;min-height:56px}
     <span class="filter-pill" data-f="sold" onclick="setCatFilter('sold')">Vendidas</span>
     <span style="flex:1"></span>
     <button class="btn-ghost btn-sm" onclick="exportExcel()">Exportar Excel</button>
+    <button class="btn-ghost btn-sm" onclick="exportJSON()">Exportar JSON</button>
+    <button class="btn-ghost btn-sm" onclick="document.getElementById('json-import').click()">Importar JSON</button>
+    <input type="file" id="json-import" accept=".json" style="display:none"/>
   </div>
   <div id="cat-stats" style="font-size:10px;color:var(--t4);margin-bottom:8px"></div>
   <div class="cat-grid" id="cat-grid"></div>
@@ -1311,6 +1314,57 @@ function exportExcel() {
   XLSX.writeFile(wb, `catalogo-${new Date().toISOString().slice(0,10)}.xlsx`);
   toast("Excel descargado");
 }
+
+function exportJSON() {
+  if (!parts.length) { toast("Catálogo vacío"); return; }
+  const data = parts.map(p => ({
+    id: p.id, marca: p.marca, modelo: p.modelo, años: p.años,
+    categoria: p.categoria, descripcion: p.descripcion, posicion: p.posicion,
+    confianza: p.confianza, sold: p.sold, fileName: p.fileName, fileSize: p.fileSize,
+    photoUrl: p.photoUrl || null, addedAt: p.addedAt, created_at: p.created_at
+  }));
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `catalogo-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("JSON descargado");
+}
+
+document.getElementById("json-import").onchange = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!Array.isArray(data) || !data.length) { toast("JSON vacío o inválido"); return; }
+    showConfirm("Importar catálogo", `Se agregarán ${data.length} partes. ¿Continuar?`, async () => {
+      let ok = 0, fail = 0;
+      for (const p of data) {
+        try {
+          const { id, marca, modelo, años, categoria, descripcion, posicion, confianza, sold, fileName, fileSize, photoUrl, addedAt } = p;
+          const partId = id || `imp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+          const body = { id: partId, data: { marca, modelo, años, categoria, descripcion, posicion, confianza, sold: !!sold, fileName, fileSize, photoUrl, addedAt, preview: photoUrl, previewFull: photoUrl } };
+          const existing = await sbFetch(`/rest/v1/partes?id=eq.${encodeURIComponent(partId)}&select=id`, "GET");
+          if (existing && existing.length) {
+            await sbFetch(`/rest/v1/partes?id=eq.${encodeURIComponent(partId)}`, "PATCH", body);
+          } else {
+            await sbFetch("/rest/v1/partes", "POST", body);
+          }
+          ok++;
+        } catch(_) { fail++; }
+      }
+      toast(`Importadas ${ok} partes${fail ? `, ${fail} fallaron` : ""}`);
+      await loadParts();
+      e.target.value = "";
+    });
+  } catch(err) {
+    toast("Error al leer el archivo JSON");
+    console.error(err);
+    e.target.value = "";
+  }
+};
 
 // ---
 // CONFIRM DIALOG
