@@ -204,9 +204,26 @@ textarea.fld-in{resize:vertical;min-height:56px}
 #lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:var(--r8)}
 
 /* --- */
-.diag-step{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--s2);border:1px solid var(--bdr2);border-radius:var(--r6);font-size:11px;color:var(--t3)}
-.diag-icon{width:14px;height:14px;border:2px solid var(--t5);border-radius:50%;flex-shrink:0}
-.diag-log{display:none;background:var(--s2);border:1px solid var(--bdr2);border-radius:var(--r6);padding:8px;font-size:11px;color:var(--t3);font-family:monospace;white-space:pre-wrap;max-height:160px;overflow-y:auto;margin-bottom:10px}
+.diag-grid{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.diag-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border:1px solid var(--bdr2);border-radius:var(--r8);transition:border-color .2s}
+.diag-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:background .3s}
+.diag-dot.idle{background:var(--t5)}
+.diag-dot.ok{background:var(--green-lt)}
+.diag-dot.err{background:var(--red-lt)}
+.diag-dot.warn{background:var(--amber-lt)}
+.diag-dot.run{background:var(--t4)}
+.diag-name{font-size:11px;font-weight:500;color:var(--t2);flex-shrink:0;min-width:130px}
+.diag-msg{font-size:10px;color:var(--t4);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.diag-run-btn{padding:4px 10px;font-size:9px;font-weight:500;background:var(--s3);border:1px solid var(--bdr2);border-radius:var(--r6);color:var(--t3);cursor:pointer;flex-shrink:0;transition:all .15s}
+.diag-run-btn:hover{background:var(--s4);color:var(--t2)}
+.diag-run-btn:disabled{opacity:.4;cursor:not-allowed}
+.diag-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.diag-run-all{padding:8px 16px;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r8);font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;transition:all .15s;white-space:nowrap}
+.diag-run-all:hover{opacity:.9}
+.diag-run-all:disabled{background:var(--s3);color:var(--t4);cursor:not-allowed}
+.diag-log-wrap{margin-bottom:12px}
+.diag-log-title{font-size:9px;font-weight:600;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+#diag-log-content{background:var(--s2);border:1px solid var(--bdr2);border-radius:var(--r6);padding:10px;font-size:10px;color:var(--t3);font-family:var(--font-mono);white-space:pre-wrap;max-height:250px;overflow-y:auto;min-height:40px;line-height:1.6}
 
 /* --- */
 :root.light{
@@ -352,7 +369,7 @@ body{transition:background .3s,color .3s}
           <span>Licencias</span>
         </button>
         <button class="snav-item" onclick="openModal('diagnostics')">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06"/><path d="M4.6 15a1.65 1.65 0 0 1-.33 1.82l-.06.06a2 2 0 0 0 2.83 2.83l.06-.06"/><path d="M15 4.6a1.65 1.65 0 0 1 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06"/><path d="M9 4.6a1.65 1.65 0 0 0-1.82-.33l-.06-.06a2 2 0 0 0-2.83 2.83l.06.06"/></svg>
           <span>Diagnóstico</span>
         </button>
       </div>
@@ -718,12 +735,17 @@ body{transition:background .3s,color .3s}
 
 <!-- DIAGNOSTICS CONTENT -->
 <div id="content-diagnostics" style="display:none">
-  <div class="sec-title">Diagnóstico del sistema</div>
-  <div class="sec-sub">Verifica la conectividad y el estado de cada componente.</div>
-  <div class="sec-card">
-    <div id="diag-steps" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px"></div>
-    <div class="diag-log" id="diag-log"></div>
-    <button class="btn-primary" id="diag-run">Ejecutar diagnóstico completo</button>
+  <div class="diag-header">
+    <div>
+      <div class="sec-title" style="margin-bottom:0">Diagnóstico CAPv2</div>
+      <div class="sec-sub" style="margin-bottom:0;margin-top:4px">Verificaciones completas del sistema CAPv2 — base de datos, API, licencias, almacenamiento y más</div>
+    </div>
+    <button class="diag-run-all" id="diag-run-all">Ejecutar todo</button>
+  </div>
+  <div class="diag-grid" id="diag-grid-src"></div>
+  <div class="diag-log-wrap">
+    <div class="diag-log-title">Registro detallado</div>
+    <pre id="diag-log-content"></pre>
   </div>
 </div>
 
@@ -991,9 +1013,10 @@ function rebindModalHandlers(name) {
     if (gcpy) gcpy.onclick = () => { if(gout) { gout.select(); navigator.clipboard?.writeText(gout.value); toast("Copiado"); } };
   }
   if (name === "diagnostics") {
-    const body = $("modal-body");
-    const run = body.querySelector("#diag-run");
-    if (run) run.onclick = diagRunHandler;
+    const grid = body.querySelector("#diag-grid-src");
+    if (grid) buildDiagGrid(grid);
+    const run = body.querySelector("#diag-run-all");
+    if (run) run.onclick = runDiagAll;
   }
 }
 
@@ -1504,52 +1527,279 @@ async function licGenHandler() {
 }
 
 // ---
-// DIAGNOSTICS
+// DIAGNOSTIC PANEL
 // ---
-async function diagRunHandler() {
-  if (!authedOnly()) return;
-  const body = $("modal-body");
-  if (!body) return;
-  const stepsEl = body.querySelector("#diag-steps");
-  const logEl = body.querySelector("#diag-log");
-  if (!stepsEl) return;
-  if (logEl) { logEl.style.display = "none"; logEl.textContent = ""; }
+const DIAG_ITEMS = [
+  { id:"network",     label:"Red" },
+  { id:"supabase",    label:"Supabase" },
+  { id:"apikeys",     label:"API Keys CAPv2" },
+  { id:"tabla-admin", label:"admin_config" },
+  { id:"tabla-dev",   label:"Dispositivos" },
+  { id:"tabla-scan",  label:"scan_log" },
+  { id:"tabla-partes",label:"partes (catálogo)" },
+  { id:"tabla-plog",  label:"partes_log" },
+  { id:"storage",     label:"Bucket Fotos" },
+  { id:"ai-config",   label:"Config IA" },
+  { id:"license",     label:"Licencia CAPv2" },
+  { id:"catalog-stats",label:"Stats Catálogo" },
+  { id:"foto-sync",   label:"Sinc. Fotos" },
+  { id:"local-store", label:"Almacenamiento local" },
+  { id:"sw",          label:"Service Worker" },
+  { id:"rls",         label:"RLS Policies" },
+  { id:"device",      label:"Dispositivo" },
+];
+const diagState = {};
+DIAG_ITEMS.forEach(i => diagState[i.id] = { status:"idle", msg:"" });
 
-  const tests = [
-    { label: "Conexión a Supabase REST", run: async () => { const r = await fetch(SB_URL + "/rest/v1/admin_config?select=id&limit=1", { headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY } }); const txt = await r.text(); let detail = r.status + " " + r.statusText; if (r.ok) try { const j = JSON.parse(txt); detail = Array.isArray(j) ? "OK (" + j.length + " filas)" : "Respuesta inesperada"; } catch(e) { detail = txt; } return { ok: r.ok, detail }; } },
-    { label: "Tabla admin_config", run: async () => { const d = await sbFetch("/rest/v1/admin_config?select=id&limit=1", "GET"); return { ok: Array.isArray(d), detail: Array.isArray(d) ? "OK" : "No es un array" }; } },
-    { label: "Tabla dispositivos", run: async () => { const d = await sbFetch("/rest/v1/devices?select=id&limit=1", "GET"); return { ok: Array.isArray(d), detail: Array.isArray(d) ? "OK" : "No es un array" }; } },
-    { label: "Tabla scan_log", run: async () => { const d = await sbFetch("/rest/v1/scan_log?select=id&limit=1", "GET"); return { ok: Array.isArray(d), detail: Array.isArray(d) ? "OK" : "No es un array" }; } },
-    { label: "Tabla partes", run: async () => { const d = await sbFetch("/rest/v1/partes?select=id&limit=1", "GET"); return { ok: Array.isArray(d), detail: Array.isArray(d) ? "OK" : "No es un array" }; } },
-    { label: "Storage bucket Fotos", run: async () => { const r = await fetch(`${SB_URL}/storage/v1/object/list/Fotos`, { method: "POST", headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json" }, body: '{"prefix":"","limit":1}' }); const ok = r.ok; const txt = ok ? "OK" : `${r.status} ${r.statusText}`; return { ok, detail: txt }; } },
-    { label: "API Keys configuradas", run: async () => { const k = adminConfig?.api_keys || []; return { ok: k.length > 0, detail: k.length > 0 ? `${k.length} key(s)` : "Sin keys ??? agrega al menos una" }; } },
-    { label: "Config de IA (modelo)", run: async () => { const m = adminConfig?.ai_model || ""; return { ok: !!m, detail: m || "Sin modelo configurado" }; } },
-  ];
+function diagLog(msg) {
+  const ctx = _diagContainer || document;
+  const el = ctx.querySelector("#diag-log-content") || $("diag-log-content");
+  if (!el) return;
+  el.textContent += msg + "\n";
+  el.scrollTop = el.scrollHeight;
+}
 
-  stepsEl.innerHTML = "";
-  for (const t of tests) {
+let _diagContainer = null;
+
+function buildDiagGrid(container) {
+  if (!container) container = document.querySelector(".modal-body #diag-grid-src, #diag-grid-src");
+  if (!container) return;
+  container.innerHTML = "";
+  _diagContainer = container.closest(".modal-body") || container;
+  DIAG_ITEMS.forEach(item => {
+    const st = diagState[item.id] || { status:"idle", msg:"" };
     const row = document.createElement("div");
-    row.className = "diag-step";
-    row.innerHTML = `<div class="diag-icon"></div><span>${t.label}</span><span style="margin-left:auto;font-size:10px" class="diag-result">Probando???</span>`;
-    stepsEl.appendChild(row);
-    try {
-      const res = await t.run();
-      row.querySelector(".diag-icon").style.cssText = `width:14px;height:14px;border-radius:50%;flex-shrink:0;background:${res.ok?"var(--green)":"var(--red)"}`;
-      row.querySelector(".diag-result").textContent = res.ok ? "OK" : "FALLO";
-      row.querySelector(".diag-result").style.color = res.ok ? "var(--green-lt)" : "var(--red-lt)";
-      if (!res.ok) {
-        if (logEl) { logEl.style.display = "block"; logEl.textContent += `[FALLO] ${t.label}: ${res.detail || "???"}\n`; }
-      } else if (res.detail && res.detail !== "OK") {
-        row.querySelector(".diag-result").textContent = res.detail;
-      }
-    } catch(e) {
-      row.querySelector(".diag-icon").style.cssText = `width:14px;height:14px;border-radius:50%;flex-shrink:0;background:var(--red)`;
-      row.querySelector(".diag-result").textContent = "ERROR";
-      row.querySelector(".diag-result").style.color = "var(--red-lt)";
-      if (logEl) { logEl.style.display = "block"; logEl.textContent += `[ERROR] ${t.label}: ${e.message}\n`; }
-    }
+    row.className = "diag-item";
+    row.innerHTML = `<span class="diag-dot ${st.status}" data-dot="${item.id}"></span>
+      <span class="diag-name">${item.label}</span>
+      <span class="diag-msg" data-msg="${item.id}">${st.msg || "—"}</span>
+      <button class="diag-run-btn" data-check="${item.id}">Probar</button>`;
+    row.querySelector("[data-check]").onclick = () => runDiag(item.id);
+    container.appendChild(row);
+  });
+}
+
+function setDiagStatus(id, status, msg) {
+  diagState[id] = { status, msg };
+  const ctx = _diagContainer || document;
+  const dot = ctx.querySelector(`[data-dot="${id}"]`); if (dot) { dot.className = `diag-dot ${status}`; }
+  const msgEl = ctx.querySelector(`[data-msg="${id}"]`); if (msgEl) { msgEl.textContent = msg; }
+}
+
+async function runDiag(id) {
+  if (!authedOnly()) return;
+  const ctx = _diagContainer || document;
+  const btn = ctx.querySelector(`[data-check="${id}"]`);
+  if (btn) btn.disabled = true;
+  setDiagStatus(id, "run", "Probando…");
+  diagLog(`[${id}] Iniciando…`);
+  try {
+    const fn = { network:diagNetwork, supabase:diagSupabase, apikeys:diagApiKeys, "tabla-admin":diagTablaAdmin, "tabla-dev":diagTablaDev, "tabla-scan":diagTablaScan, "tabla-partes":diagTablaPartes, "tabla-plog":diagTablaPlog, storage:diagStorage, "ai-config":diagAIConfig, license:diagLicense, "catalog-stats":diagCatalogStats, "foto-sync":diagFotoSync, "local-store":diagLocalStore, sw:diagSW, rls:diagRLS, device:diagDevice }[id];
+    if (!fn) { setDiagStatus(id, "err", "Check no encontrado"); diagLog(`[${id}] Error: check no encontrado`); return; }
+    const result = await fn();
+    setDiagStatus(id, result.status, result.message);
+    diagLog(`[${id}] ${result.status.toUpperCase()}: ${result.message}`);
+    if (result.detail) diagLog(`[${id}] Detalle: ${result.detail}`);
+  } catch(e) {
+    setDiagStatus(id, "err", e.message || "Error");
+    diagLog(`[${id}] ERROR: ${e.message}`);
+  } finally {
+    if (btn) btn.disabled = false;
   }
-  toast("Diagnóstico completado");
+}
+
+async function runDiagAll() {
+  if (!authedOnly()) return;
+  const ctx = _diagContainer || document;
+  const btn = ctx.querySelector("#diag-run-all") || $("diag-run-all");
+  if (btn) { btn.disabled = true; btn.textContent = "Ejecutando…"; }
+  diagLog("=== DIAGNÓSTICO COMPLETO ===");
+  for (const item of DIAG_ITEMS) {
+    await runDiag(item.id);
+  }
+  diagLog("=== FINALIZADO ===");
+  if (btn) { btn.disabled = false; btn.textContent = "Ejecutar todo"; }
+}
+
+async function diagNetwork() {
+  if (!navigator.onLine) return { status:"err", message:"Sin conexión a internet" };
+  try {
+    await fetch("https://clients3.google.com/generate_204", { mode:"no-cors", signal:AbortSignal.timeout(5000) });
+    return { status:"ok", message:"Conectado a internet" };
+  } catch(e) {
+    return { status:"warn", message:"Red limitada o muy lenta" };
+  }
+}
+
+async function diagSupabase() {
+  const t0 = Date.now();
+  try {
+    const data = await sbFetch("/rest/v1/admin_config?select=id&limit=1", "GET");
+    const ms = Date.now() - t0;
+    if (Array.isArray(data)) return { status:"ok", message:`Conexión exitosa (${ms}ms)` };
+    return { status:"err", message:`Respuesta inesperada (${ms}ms)` };
+  } catch(e) {
+    return { status:"err", message:e.message || "Sin conexión" };
+  }
+}
+
+async function diagApiKeys() {
+  const keys = adminConfig?.api_keys || [];
+  if (!keys.length) return { status:"err", message:"Ninguna API Key configurada" };
+  const provs = keys.map(k => k.startsWith("sk-or-")?"OpenRouter":k.startsWith("gsk_")?"Groq":"Gemini");
+  const counts = {};
+  provs.forEach(p => { counts[p] = (counts[p]||0)+1; });
+  const detail = Object.entries(counts).map(([p,c]) => `${p}: ${c}`).join(", ");
+  return { status:"ok", message:`${keys.length} key(s) configuradas`, detail };
+}
+
+async function diagTablaAdmin() {
+  const d = await sbFetch("/rest/v1/admin_config?select=id&limit=1", "GET");
+  if (Array.isArray(d)) return { status:"ok", message:`${d.length} fila(s)` };
+  return { status:"err", message:"No accesible" };
+}
+
+async function diagTablaDev() {
+  const d = await sbFetch("/rest/v1/devices?select=id&limit=1000", "GET");
+  if (Array.isArray(d)) return { status:"ok", message:`${d.length} dispositivo(s)` };
+  return { status:"err", message:"No accesible" };
+}
+
+async function diagTablaScan() {
+  const d = await sbFetch("/rest/v1/scan_log?select=id&limit=1000", "GET");
+  if (Array.isArray(d)) return { status:"ok", message:`${d.length} registro(s)` };
+  return { status:"err", message:"No accesible" };
+}
+
+async function diagTablaPartes() {
+  const d = await sbFetch("/rest/v1/partes?select=id&limit=1000", "GET");
+  if (Array.isArray(d)) return { status:"ok", message:`${d.length} parte(s)` };
+  return { status:"err", message:"No accesible" };
+}
+
+async function diagTablaPlog() {
+  const d = await sbFetch("/rest/v1/partes_log?select=id&limit=1000", "GET");
+  if (Array.isArray(d)) return { status:"ok", message:`${d.length} registro(s)` };
+  return { status:"err", message:"No accesible o no existe" };
+}
+
+async function diagStorage() {
+  try {
+    const r = await fetch(`${SB_URL}/storage/v1/object/list/Fotos`, { method:"POST", headers:{ "apikey":SB_KEY, "Authorization":"Bearer "+SB_KEY, "Content-Type":"application/json" }, body:'{"prefix":"","limit":1}' });
+    if (r.ok) return { status:"ok", message:"Bucket accesible" };
+    return { status:"err", message:`Error ${r.status}` };
+  } catch(e) {
+    return { status:"err", message:e.message };
+  }
+}
+
+async function diagAIConfig() {
+  const model = adminConfig?.ai_model || "";
+  const provider = adminConfig?.ai_provider || "";
+  if (model) return { status:"ok", message:`${provider || "desconocido"} · ${model}` };
+  return { status:"warn", message:"Sin modelo configurado" };
+}
+
+async function diagLicense() {
+  const secret = adminConfig?.license_secret || "";
+  const model = adminConfig?.ai_model || "";
+  const provider = adminConfig?.ai_provider || "";
+  const parts = [];
+  if (secret) parts.push("License secret presente");
+  else parts.push("License secret vacío");
+  if (model) parts.push(`Modelo: ${model}`);
+  else parts.push("Sin modelo");
+  if (provider) parts.push(`Provider: ${provider}`);
+  else parts.push("Sin provider");
+  const errs = !secret || !model || !provider;
+  return { status:errs?"warn":"ok", message:parts.join(" · ") };
+}
+
+async function diagCatalogStats() {
+  try {
+    const all = await sbFetch("/rest/v1/partes?select=id,estado,categoria&limit=5000", "GET");
+    if (!Array.isArray(all)) return { status:"err", message:"No accesible" };
+    const total = all.length;
+    const sold = all.filter(p => p.estado === "vendido" || p.estado === "sold").length;
+    const avail = total - sold;
+    const cats = {};
+    all.forEach(p => { if (p.categoria) { cats[p.categoria] = (cats[p.categoria]||0)+1; } });
+    const catList = Object.entries(cats).sort((a,b) => b[1]-a[1]).slice(0,5).map(([c,n]) => `${c}:${n}`).join(", ");
+    const detail = catList ? `Categorías: ${catList}` : "Sin categorías";
+    return { status:"ok", message:`${total} total · ${avail} disp. · ${sold} vend.`, detail };
+  } catch(e) {
+    return { status:"err", message:e.message };
+  }
+}
+
+async function diagFotoSync() {
+  try {
+    const parts = await sbFetch("/rest/v1/partes?select=id,foto_url&limit=5000", "GET");
+    if (!Array.isArray(parts)) return { status:"err", message:"No accesible" };
+    const total = parts.length;
+    const withFoto = parts.filter(p => p.foto_url && p.foto_url !== "").length;
+    const without = total - withFoto;
+    const pct = total ? ((withFoto/total)*100).toFixed(0) : "0";
+    if (total === 0) return { status:"warn", message:"Catálogo vacío" };
+    return { status:without > 10?"warn":"ok", message:`${withFoto} con foto · ${without} sin foto (${pct}% sinc.)` };
+  } catch(e) {
+    return { status:"err", message:e.message };
+  }
+}
+
+async function diagRLS() {
+  try {
+    const testVal = "_diag_" + Date.now();
+    const enc = encodeURIComponent(testVal);
+    const ins = await sbFetch("/rest/v1/partes_log", "POST", { accion:"diag_rls", detalle:testVal, usuario:"sistema" });
+    if (!ins) return { status:"err", message:"Inserción rechazada (RLS bloquea escritura)" };
+    const check = await sbFetch(`/rest/v1/partes_log?detalle=eq.${enc}&select=id&limit=1`, "GET");
+    const ok = Array.isArray(check) && check.length > 0;
+    await sbFetch(`/rest/v1/partes_log?detalle=eq.${enc}`, "DELETE");
+    if (ok) return { status:"ok", message:"Lectura/escritura OK" };
+    return { status:"warn", message:"Escritura OK, pero no se pudo leer el registro de prueba" };
+  } catch(e) {
+    if (e.message && (e.message.includes("406") || e.message.includes("policy"))) return { status:"err", message:"RLS bloqueando: " + e.message };
+    return { status:"err", message:e.message || "Error al probar RLS" };
+  }
+}
+
+async function diagLocalStore() {
+  try {
+    let total = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k) total += localStorage.getItem(k).length;
+    }
+    const max = 5e6;
+    const free = ((max - total) / 1024).toFixed(0);
+    return { status:"ok", message:`${(total/1024).toFixed(0)}KB usado, ${free}KB libre` };
+  } catch(e) {
+    return { status:"err", message:e.message };
+  }
+}
+
+async function diagSW() {
+  if (!("serviceWorker" in navigator)) return { status:"warn", message:"No soportado" };
+  try {
+    const reg = await navigator.serviceWorker.getRegistration();
+    if (reg) return { status:"ok", message:"Registrado y activo" };
+    return { status:"warn", message:"No registrado" };
+  } catch(e) {
+    return { status:"err", message:e.message };
+  }
+}
+
+async function diagDevice() {
+  const info = [];
+  info.push(`SO: ${navigator.platform || "desconocido"}`);
+  info.push(`Idioma: ${navigator.language}`);
+  info.push(`Pantalla: ${window.innerWidth}×${window.innerHeight}`);
+  try {
+    const hasCam = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    info.push(`Cámara: ${hasCam ? "sí" : "no"}`);
+  } catch(_) {}
+  return { status:"ok", message:info.join(" · ") };
 }
 
 // ---
