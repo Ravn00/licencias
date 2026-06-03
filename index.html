@@ -1013,6 +1013,7 @@ function rebindModalHandlers(name) {
     if (gcpy) gcpy.onclick = () => { if(gout) { gout.select(); navigator.clipboard?.writeText(gout.value); toast("Copiado"); } };
   }
   if (name === "diagnostics") {
+    const body = $("modal-body");
     const grid = body.querySelector("#diag-grid-src");
     if (grid) buildDiagGrid(grid);
     const run = body.querySelector("#diag-run-all");
