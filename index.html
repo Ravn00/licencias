@@ -1315,7 +1315,8 @@ window.addEventListener("load", async () => {
     loadAllData();
   }
   $("pw-input").focus();
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+  // Unregister old SW to clear corrupt cache
+  if ("serviceWorker" in navigator) navigator.serviceWorker.getRegistrations().then(r => r.forEach(r => r.unregister()));
 });
 </script>
 </body>
