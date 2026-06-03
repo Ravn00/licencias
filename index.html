@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Panel â€” Desarmaduria Paola"/>
+<link rel="manifest" href="manifest-panel.json"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -1314,6 +1315,7 @@ window.addEventListener("load", async () => {
     loadAllData();
   }
   $("pw-input").focus();
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
 });
 </script>
 </body>
