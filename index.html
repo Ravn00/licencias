@@ -116,6 +116,7 @@ tr:last-child td{border-bottom:none}
 .badge-away{background:rgba(192,138,46,.15);color:var(--amber-lt)}
 .badge-success{background:var(--green-dim);color:var(--green-lt)}
 .badge-error{background:rgba(192,57,43,.15);color:var(--red-lt)}
+.badge-warn{background:rgba(234,179,8,.12);color:#eab308}
 
 /* --- */
 .fld-group{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
@@ -286,6 +287,7 @@ textarea.fld-in{resize:vertical;min-height:56px}
       <button class="tb-btn" onclick="openModal('apikeys')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys</button>
       <button class="tb-btn" onclick="openModal('devices')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1h6"/><path d="M9 23h6"/><path d="M12 21v-2"/></svg>Dispositivos</button>
       <button class="tb-btn" onclick="openModal('scanlog')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Historial</button>
+<button class="tb-btn" onclick="openModal('audit')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Auditoría</button>
       <button class="tb-btn" onclick="openModal('messages')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes</button>
       <button class="tb-btn" onclick="openModal('maintenance')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Mantenimiento</button>
       <button class="tb-btn" onclick="openModal('license')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Licencias</button>
@@ -379,6 +381,32 @@ textarea.fld-in{resize:vertical;min-height:56px}
   <div id="sl-empty" style="display:none;padding:24px;text-align:center;color:var(--t4);font-size:12px">Sin escaneos registrados aún.</div>
   <div style="text-align:center;margin-top:10px">
     <button class="btn-ghost btn-sm" id="sl-load-more">Cargar más</button>
+  </div>
+</div>
+
+<!-- AUDIT CONTENT -->
+<div id="content-audit" style="display:none">
+  <div class="sec-title">Auditoría de cambios</div>
+  <div class="sec-sub">Registro de todas las modificaciones hechas al catálogo.</div>
+  <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+    <input class="fld-in" id="audit-search" placeholder="Buscar por ID de parte" style="flex:1;min-width:140px"/>
+    <select class="fld-in" id="audit-filter" style="width:auto;min-width:90px">
+      <option value="all">Todos</option>
+      <option value="create">Creadas</option>
+      <option value="update">Editadas</option>
+      <option value="delete">Eliminadas</option>
+    </select>
+    <button class="btn-ghost btn-sm" id="audit-refresh">Refrescar</button>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Hora</th><th>Parte ID</th><th>Acción</th><th>Detalle</th><th>Dispositivo</th></tr></thead>
+      <tbody id="audit-tbody"></tbody>
+    </table>
+  </div>
+  <div id="audit-empty" style="display:none;padding:24px;text-align:center;color:var(--t4);font-size:12px">Sin cambios registrados aún.</div>
+  <div style="text-align:center;margin-top:10px">
+    <button class="btn-ghost btn-sm" id="audit-load-more">Cargar más</button>
   </div>
 </div>
 
@@ -684,8 +712,8 @@ const $ = id => document.getElementById(id);
 // ---
 // MODAL SYSTEM
 // ---
-const modalNames = { catalog:"Catálogo", apikeys:"API Keys", devices:"Dispositivos", scanlog:"Historial", messages:"Mensajes", maintenance:"Mantenimiento", license:"Licencias", diagnostics:"Diagnóstico" };
-const modalIcons = { catalog:"[cat]", apikeys:"[key]", devices:"[dev]", scanlog:"[log]", messages:"[msg]", maintenance:"[mnt]", license:"[lic]", diagnostics:"[diag]" };
+const modalNames = { catalog:"Catálogo", apikeys:"API Keys", devices:"Dispositivos", scanlog:"Historial", messages:"Mensajes", maintenance:"Mantenimiento", license:"Licencias", diagnostics:"Diagnóstico", audit:"Auditoría" };
+const modalIcons = { catalog:"[cat]", apikeys:"[key]", devices:"[dev]", scanlog:"[log]", messages:"[msg]", maintenance:"[mnt]", license:"[lic]", diagnostics:"[diag]", audit:"[aud]" };
 
 function openModal(name) {
   const overlay = $("modal-overlay");
@@ -703,6 +731,7 @@ function openModal(name) {
   if (name === "devices") renderDevicesInModal();
   if (name === "catalog") { catSearch = ""; const cs = body.querySelector("#cat-search"); if(cs) cs.value = ""; renderCatalogInModal(); }
   if (name === "scanlog") renderScanLogInModal();
+  if (name === "audit") renderAuditLogInModal();
   if (name === "apikeys" && adminConfig) renderKeysInModal();
 }
 
@@ -728,6 +757,15 @@ function rebindModalHandlers(name) {
     if (f) f.onchange = () => { slFilter = f.value; renderScanLogInModal(); };
     if (r) r.onclick = () => { slPage = 0; loadScanLogs(false); };
     if (m) m.onclick = () => { loadScanLogs(true); };
+  }
+  if (name === "audit") {
+    const body = $("modal-body");
+    const s = body.querySelector("#audit-search"); const f = body.querySelector("#audit-filter");
+    const r = body.querySelector("#audit-refresh"); const m = body.querySelector("#audit-load-more");
+    if (s) s.oninput = () => { auditSearch = s.value.toLowerCase(); renderAuditLogInModal(); };
+    if (f) f.onchange = () => { auditFilter = f.value; renderAuditLogInModal(); };
+    if (r) r.onclick = () => { auditPage = 0; loadAuditLogs(false); };
+    if (m) m.onclick = () => { loadAuditLogs(true); };
   }
   if (name === "apikeys") {
     const body = $("modal-body");
@@ -962,7 +1000,8 @@ async function loadAllData() {
   await Promise.all([
     loadParts(),
     loadDevices(),
-    loadScanLogs(false)
+    loadScanLogs(false),
+    loadAuditLogs(false)
   ]);
   allLoaded = true;
 }
@@ -1188,6 +1227,59 @@ function renderScanLogInModal() {
       <td>${escH(l.categoria || "")}</td>
       <td><span class="badge ${resClass}">${l.resultado || "---"}</span></td>
       <td style="color:var(--t4)">${l.latencia_ms != null ? l.latencia_ms + "ms" : "---"}</td>
+    </tr>`;
+  }).join("");
+}
+
+// ---
+// AUDIT LOG
+// ---
+let auditLogs = [];
+let auditSearch = "";
+let auditFilter = "all";
+let auditPage = 0;
+let auditTotal = 0;
+const AUDIT_PAGE_SIZE = 50;
+
+async function loadAuditLogs(append) {
+  try {
+    const offset = append ? auditPage * AUDIT_PAGE_SIZE : 0;
+    const params = `/rest/v1/partes_log?select=*&order=timestamp.desc&limit=${AUDIT_PAGE_SIZE}&offset=${offset}`;
+    const data = await sbFetch(params, "GET");
+    if (!append) {
+      auditLogs = data || [];
+      const cr = await fetch(`${SB_URL}/rest/v1/partes_log?select=id&limit=0`, { headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Prefer": "count=exact" } });
+      if (cr.ok) auditTotal = parseInt(cr.headers.get("content-range")?.split("/")[1] || cr.headers.get("x-total-count") || "0", 10) || 0;
+    } else { auditLogs = auditLogs.concat(data || []); }
+    auditPage = append ? auditPage + 1 : 1;
+    if (isModalOpen("audit")) renderAuditLogInModal();
+  } catch(e) { console.error("loadAuditLogs:", e); }
+}
+
+function renderAuditLogInModal() {
+  const body = $("modal-body");
+  if (!body) return;
+  const tbody = body.querySelector("#audit-tbody");
+  const empty = body.querySelector("#audit-empty");
+  if (!tbody) return;
+  let filtered = [...auditLogs];
+  if (auditSearch) { const q = auditSearch; filtered = filtered.filter(l => l.part_id?.includes(q)); }
+  if (auditFilter !== "all") filtered = filtered.filter(l => l.action === auditFilter);
+  const stats = body.querySelector("#audit-stats") || (() => { const s = document.createElement("div"); s.id = "audit-stats"; s.style.cssText = "font-size:10px;color:var(--t4);margin-bottom:6px"; body.querySelector(".tbl-wrap")?.before(s); return s; })();
+  if (stats) stats.textContent = auditTotal > 0 ? `${auditLogs.length} cargados de ${auditTotal} totales` : `${auditLogs.length} registros`;
+  if (filtered.length === 0) { tbody.innerHTML = ""; if (empty) empty.style.display = "block"; return; }
+  if (empty) empty.style.display = "none";
+  const actionLabels = { create:"Creada", update:"Editada", delete:"Eliminada" };
+  tbody.innerHTML = filtered.map(l => {
+    const ts = l.timestamp ? new Date(l.timestamp.endsWith("Z")||l.timestamp.includes("+")?l.timestamp:l.timestamp+"Z").toLocaleString("es-CL") : "???";
+    let detail = "";
+    try { const c = JSON.parse(l.changes || "{}"); detail = [c.marca, c.modelo].filter(Boolean).join(" ") || c.sold != null ? (c.sold ? "Vendido" : "Disponible") : ""; } catch(_) {}
+    return `<tr>
+      <td style="font-size:10px;color:var(--t4);white-space:nowrap">${ts}</td>
+      <td style="font-family:monospace;font-size:10px">${escH(l.part_id || "")}</td>
+      <td><span class="badge ${l.action === "delete" ? "badge-error" : l.action === "create" ? "badge-success" : "badge-warn"}">${actionLabels[l.action] || l.action}</span></td>
+      <td style="font-size:10px;color:var(--t4)">${escH(detail)}</td>
+      <td style="font-family:monospace;font-size:10px;color:var(--t4)">${escH((l.device_id || "").slice(0, 12))}</td>
     </tr>`;
   }).join("");
 }
