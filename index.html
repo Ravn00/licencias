@@ -635,6 +635,7 @@ async function getHash(str) {
   return sha256(str);
 }
 async function doLogin() {
+  await loadAdminConfig();
   const pw = document.getElementById("pw-input").value;
   const errEl = document.getElementById("pw-error");
   const hash = await getHash(pw);
