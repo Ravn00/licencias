@@ -50,6 +50,10 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           <span>Vendedores</span>
         </button>
+        <button class="snav-item" onclick="openModal('sales')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <span>Ventas</span>
+        </button>
         <button class="snav-item" onclick="openModal('devices')">
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1h6"/><path d="M9 23h6"/><path d="M12 21v-2"/></svg>
           <span>Dispositivos</span><span class="scnt" id="c-devices">0</span>
@@ -130,6 +134,11 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
             <div class="ds-label">API Keys</div>
             <div class="ds-sub">Claves de IA</div>
+          </div>
+          <div class="dash-section-btn" onclick="openModal('sales')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <div class="ds-label">Ventas</div>
+            <div class="ds-sub">Comisiones por vendedor</div>
           </div>
           <div class="dash-section-btn" onclick="openModal('devices')">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1h6"/><path d="M9 23h6"/><path d="M12 21v-2"/></svg>
@@ -233,6 +242,32 @@
       <button class="btn-primary btn-sm" id="sel-add" style="align-self:flex-end">+ Agregar</button>
     </div>
     <div id="sel-status" style="font-size:11px;margin-top:5px;min-height:14px;color:var(--t4)"></div>
+  </div>
+</div>
+
+<!-- SALES CONTENT -->
+<div id="content-sales" style="display:none">
+  <div class="sec-title">Ventas y Comisiones</div>
+  <div class="sec-sub">Registro de todas las ventas realizadas desde la app de vendedores con comisiones del 10%.</div>
+  <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+    <input class="fld-in" id="sales-search" placeholder="Buscar por vendedor o parte…" style="flex:1;min-width:140px"/>
+    <select class="fld-in" id="sales-filter" style="width:auto;min-width:90px">
+      <option value="all">Todos</option>
+      <option value="seller">Por vendedor</option>
+    </select>
+    <button class="btn-ghost btn-sm" id="sales-refresh" title="Recargar ventas">Refrescar</button>
+  </div>
+  <div class="sales-summary" id="sales-summary" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Fecha</th><th>Vendedor</th><th>Parte</th><th>Total</th><th>Comisión 10%</th></tr></thead>
+      <tbody id="sales-tbody"></tbody>
+    </table>
+  </div>
+  <div id="sales-empty" style="display:none;padding:24px;text-align:center;color:var(--t4);font-size:12px">Sin ventas registradas aún.</div>
+  <div style="text-align:center;margin-top:10px">
+    <button class="btn-ghost btn-sm" id="sales-load-more" title="Cargar más ventas">Cargar más</button>
+    <button class="btn-ghost btn-sm" id="sales-export" title="Exportar ventas a Excel" style="margin-left:6px">Exportar Excel</button>
   </div>
 </div>
 
