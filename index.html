@@ -33,6 +33,7 @@ body{
   padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
 }
 ::-webkit-scrollbar{width:2px;height:2px}
+*{scrollbar-width:thin;scrollbar-color:var(--s4) transparent}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--s4);border-radius:2px}
 button{font-family:var(--font-mono);cursor:pointer;border:none}
@@ -202,6 +203,8 @@ textarea.fld-in{resize:vertical;min-height:56px}
 #lightbox{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;padding:20px;cursor:pointer}
 #lightbox.on{display:flex}
 #lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:var(--r8)}
+#lb-close{position:fixed;top:16px;right:16px;background:none;border:none;color:#fff;font-size:32px;cursor:pointer;z-index:9999;line-height:1;opacity:.7;transition:opacity .2s}
+#lb-close:hover{opacity:1}
 
 /* --- */
 .diag-grid{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
@@ -522,7 +525,7 @@ body{transition:background .3s,color .3s}
   <div class="sec-sub">Monitorea los dispositivos que ejecutan CAPv2. Puedes bloquear o eliminar dispositivos.</div>
   <div class="dev-table-wrap">
     <table>
-      <thead><tr><th>Dispositivo</th><th>Nombre</th><th>??ltima conexión</th><th>Escaneos</th><th>Estado</th><th>Acción</th></tr></thead>
+      <thead><tr><th>Dispositivo</th><th>Nombre</th><th>Última conexión</th><th>Escaneos</th><th>Estado</th><th>Acción</th></tr></thead>
       <tbody id="dev-tbody"></tbody>
     </table>
   </div>
@@ -774,7 +777,8 @@ body{transition:background .3s,color .3s}
 
 <!-- LIGHTBOX -->
 <div id="lightbox" onclick="closeLightbox()">
-  <img id="lb-img" src="" alt=""/>
+  <button id="lb-close" onclick="event.stopPropagation();closeLightbox()">&times;</button>
+  <img id="lb-img" src="" alt="" onclick="event.stopPropagation()"/>
 </div>
 
 <!-- TOAST -->
@@ -790,8 +794,7 @@ const SB_KEY = "sb_publishable_1Asg-FYNLYby-n-upo5NAg_z6ZJ4TTx";
 // ---
 // PASSWORD GATE
 // ---
-const PW_HASH_FALLBACK = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"; // SHA-256 of "admin"
-let adminPasswordHash = PW_HASH_FALLBACK;
+let adminPasswordHash = "";
 let authed = false;
 
 function authedOnly() { if (!authed) { window.location.reload(); return false; } return true; }
@@ -1069,7 +1072,6 @@ async function loadAdminConfig() {
       }
       if (!Array.isArray(adminConfig.api_keys)) adminConfig.api_keys = [];
       if (adminConfig.password_hash) adminPasswordHash = adminConfig.password_hash;
-      else adminPasswordHash = PW_HASH_FALLBACK;
     } else { adminConfig = null; }
   } catch(e) { console.warn("loadAdminConfig:", e); adminConfig = null; }
   return adminConfig;
@@ -1093,7 +1095,6 @@ async function upsertAdminConfig(payload) {
 }
 
 async function updateAdminConfig(updates) {
-  if (!allLoaded) return;
   try {
     const payload = { ...updates, updated_at: new Date().toISOString() };
     await upsertAdminConfig(payload);
@@ -1517,8 +1518,8 @@ async function licGenHandler() {
   if (!secret) {
     try {
       const cfg = await sbFetch("/rest/v1/admin_config?select=license_secret&limit=1");
-      secret = (cfg && cfg[0]?.license_secret) || "PaolaDesarm_2026_X9k7mQr4";
-    } catch(e) { secret = "PaolaDesarm_2026_X9k7mQr4"; }
+      secret = (cfg && cfg[0]?.license_secret) || "";
+    } catch(e) { secret = ""; }
   }
   const hash = await licHash(secret, client, month, year2d);
   const code = `AP-${client}-${String(month).padStart(2,'0')}${String(year2d).padStart(2,'0')}-${hash}`;
@@ -1749,19 +1750,20 @@ async function diagFotoSync() {
 }
 
 async function diagRLS() {
+  const testId = "_diag_" + Date.now();
+  const enc = encodeURIComponent(testId);
   try {
-    const testId = "_diag_" + Date.now();
-    const enc = encodeURIComponent(testId);
     await sbFetch("/rest/v1/partes_log", "POST", { action:"create", part_id:testId, changes:JSON.stringify({diag:true}), device_id:"diag", timestamp:new Date().toISOString() });
     const check = await sbFetch(`/rest/v1/partes_log?part_id=eq.${enc}&select=id&limit=1`, "GET");
     const ok = Array.isArray(check) && check.length > 0;
-    try { await sbFetch(`/rest/v1/partes_log?part_id=eq.${enc}`, "DELETE"); } catch(_) {}
-    if (ok) return { status:"ok", message:"Lectura/escritura OK" };
-    return { status:"warn", message:"El POST no arrojó error pero no se encontró el registro (quizás RLS bloquea SELECT)" };
+    if (!ok) return { status:"warn", message:"El POST no arrojó error pero no se encontró el registro (quizás RLS bloquea SELECT)" };
+    return { status:"ok", message:"Lectura/escritura OK" };
   } catch(e) {
     if (e.message && (e.message.includes("policy"))) return { status:"err", message:"RLS bloquea: " + e.message };
     if (e.message && e.message.includes("PGRST204")) return { status:"err", message:"Tabla partes_log no existe o columnas incorrectas" };
     return { status:"err", message:e.message || "Error desconocido" };
+  } finally {
+    try { await sbFetch(`/rest/v1/partes_log?part_id=eq.${enc}`, "DELETE"); } catch(_) {}
   }
 }
 
@@ -1922,24 +1924,24 @@ function toast(msg, dur) {
 // ---
 // LIGHTBOX
 // ---
-function openLightbox(src) { $("lb-img").src = src; $("lightbox").classList.add("on"); }
-function closeLightbox() { $("lightbox").classList.remove("on"); $("lb-img").src = ""; }
+function openLightbox(src) { $("lb-img").src = src; $("lightbox").classList.add("on"); document.addEventListener("keydown", closeLightboxKey); }
+function closeLightbox() { $("lightbox").classList.remove("on"); $("lb-img").src = ""; document.removeEventListener("keydown", closeLightboxKey); }
+function closeLightboxKey(e) { if (e.key === "Escape") closeLightbox(); }
 
 // ---
 // UTILS
 // ---
-function escH(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+function escH(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/\//g,"&#x2F;"); }
 
 // ---
 // REFRESH ALL
 // ---
-function refreshAll() {
+async function refreshAll() {
   if (!authedOnly()) return;
-  loadParts();
-  loadDevices();
+  await Promise.all([loadParts(), loadDevices()]);
   slPage = 0;
-  loadScanLogs(false);
-  updateDashboardStats();
+  await loadScanLogs(false);
+  await updateDashboardStats();
   toast("Datos actualizados");
 }
 
