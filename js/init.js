@@ -349,11 +349,81 @@ function renderAuditLogInModal() {
 }
 
 // ---
+// SALES
+// ---
+function renderSalesInModal() {
+  const body = $("modal-body");
+  if (!body) return;
+  const tbody = body.querySelector("#sales-tbody");
+  const empty = body.querySelector("#sales-empty");
+  const summary = body.querySelector("#sales-summary");
+  if (!tbody) return;
+  let filtered = [...ventas];
+  if (salesSearch) {
+    const q = salesSearch.toLowerCase();
+    filtered = filtered.filter(v =>
+      (v.vendedor || "").toLowerCase().includes(q) ||
+      (v.items || []).some(it => (it.marca + " " + it.modelo).toLowerCase().includes(q))
+    );
+  }
+
+  const stats = body.querySelector("#sales-stats") || (() => { const s = document.createElement("div"); s.id = "sales-stats"; s.style.cssText = "font-size:10px;color:var(--t4);margin-bottom:6px"; tbody.parentElement?.before(s); return s; })();
+  if (stats) stats.textContent = salesTotal > 0 ? `${ventas.length} cargadas de ${salesTotal} totales` : `${ventas.length} ventas`;
+
+  if (summary) {
+    const totalsBySeller = {};
+    ventas.forEach(v => {
+      const seller = v.vendedor || "Anónimo";
+      if (!totalsBySeller[seller]) totalsBySeller[seller] = { count: 0, total: 0, comision: 0 };
+      totalsBySeller[seller].count++;
+      totalsBySeller[seller].total += v.total || 0;
+      totalsBySeller[seller].comision += v.comision || 0;
+    });
+    const totalVentas = ventas.reduce((s, v) => s + (v.total || 0), 0);
+    const totalComisiones = ventas.reduce((s, v) => s + (v.comision || 0), 0);
+    summary.innerHTML = `
+      <div class="dash-card" style="flex:1;min-width:120px">
+        <div class="dash-val gold">${ventas.length}</div>
+        <div class="dash-label">Ventas totales</div>
+      </div>
+      <div class="dash-card" style="flex:1;min-width:120px">
+        <div class="dash-val green">$${Math.round(totalVentas).toLocaleString("es-CL")}</div>
+        <div class="dash-label">Ingresos totales</div>
+      </div>
+      <div class="dash-card" style="flex:1;min-width:120px">
+        <div class="dash-val" style="color:var(--amber-lt)">$${Math.round(totalComisiones).toLocaleString("es-CL")}</div>
+        <div class="dash-label">Comisiones (10%)</div>
+      </div>
+      ${Object.entries(totalsBySeller).sort((a,b) => b[1].total - a[1].total).map(([seller, data]) =>
+        `<div class="dash-card" style="flex:1;min-width:140px">
+          <div class="dash-val default">${escH(seller)}</div>
+          <div class="dash-label">${data.count} ventas · $${Math.round(data.comision).toLocaleString("es-CL")} comisión</div>
+        </div>`
+      ).join("")}`;
+  }
+
+  if (filtered.length === 0) { tbody.innerHTML = ""; if (empty) empty.style.display = "block"; return; }
+  if (empty) empty.style.display = "none";
+  tbody.innerHTML = filtered.map(v => {
+    const ts = v.fecha || (v.created_at ? new Date(v.created_at.endsWith("Z")||v.created_at.includes("+")?v.created_at:v.created_at+"Z").toLocaleString("es-CL") : "???");
+    const partsList = (v.items || []).map(it => `${it.marca} ${it.modelo}`).join(", ");
+    const comision = v.comision || 0;
+    return `<tr>
+      <td style="font-size:10px;color:var(--t4);white-space:nowrap">${ts}</td>
+      <td style="font-weight:600">${escH(v.vendedor || "Anónimo")}</td>
+      <td style="font-size:10px;color:var(--t2)">${escH(partsList.slice(0,60))}</td>
+      <td style="font-family:var(--font-display);font-weight:600;color:var(--gold)">$${Math.round(v.total||0).toLocaleString("es-CL")}</td>
+      <td style="color:var(--amber-lt)">$${Math.round(comision).toLocaleString("es-CL")}</td>
+    </tr>`;
+  }).join("");
+}
+
+// ---
 // REFRESH ALL
 // ---
 async function refreshAll() {
   if (!authedOnly()) return;
-  await Promise.all([loadParts(), loadDevices()]);
+  await Promise.all([loadParts(), loadDevices(), loadVentas(false)]);
   slPage = 0;
   await loadScanLogs(false);
   await updateDashboardStats();
