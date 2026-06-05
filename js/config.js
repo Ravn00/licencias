@@ -124,15 +124,25 @@ async function loadAdminConfig() {
 }
 
 async function upsertAdminConfig(payload) {
-  delete payload.id;
-  const qs = "id=eq.global";
-  const opts = {
-    method: "PATCH",
-    headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
-    body: JSON.stringify(payload)
-  };
-  const res = await fetch(SB_URL + "/rest/v1/admin_config?" + qs, opts);
-  if (!res.ok) { const t = await res.text(); console.warn("upsertAdminConfig:", res.status, t.slice(0,100)); return null; }
+  const hasExisting = adminConfig && adminConfig.id;
+  if (hasExisting) {
+    delete payload.id;
+    const opts = {
+      method: "PATCH",
+      headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
+      body: JSON.stringify(payload)
+    };
+    const res = await fetch(SB_URL + "/rest/v1/admin_config?id=eq.global", opts);
+    if (!res.ok) { const t = await res.text(); console.warn("upsertAdminConfig PATCH:", res.status, t.slice(0,100)); return null; }
+  } else {
+    const opts = {
+      method: "POST",
+      headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
+      body: JSON.stringify({ id: "global", ...payload })
+    };
+    const res = await fetch(SB_URL + "/rest/v1/admin_config", opts);
+    if (!res.ok) { const t = await res.text(); console.warn("upsertAdminConfig POST:", res.status, t.slice(0,100)); return null; }
+  }
 }
 
 async function updateAdminConfig(updates) {
