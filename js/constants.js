@@ -20,8 +20,8 @@ const AUDIT_PAGE_SIZE = 50;
 let confirmCb = null;
 const $ = id => document.getElementById(id);
 
-const modalNames = { catalog:"Catálogo", apikeys:"API Keys", devices:"Dispositivos", scanlog:"Historial", messages:"Mensajes", maintenance:"Mantenimiento", license:"Licencias", diagnostics:"Diagnóstico", audit:"Auditoría" };
-const modalIcons = { catalog:"[cat]", apikeys:"[key]", devices:"[dev]", scanlog:"[log]", messages:"[msg]", maintenance:"[mnt]", license:"[lic]", diagnostics:"[diag]", audit:"[aud]" };
+const modalNames = { catalog:"Catálogo", apikeys:"API Keys", sellers:"Vendedores", devices:"Dispositivos", scanlog:"Historial", messages:"Mensajes", maintenance:"Mantenimiento", license:"Licencias", diagnostics:"Diagnóstico", audit:"Auditoría" };
+const modalIcons = { catalog:"[cat]", apikeys:"[key]", sellers:"[sel]", devices:"[dev]", scanlog:"[log]", messages:"[msg]", maintenance:"[mnt]", license:"[lic]", diagnostics:"[diag]", audit:"[aud]" };
 
 const DIAG_ITEMS = [
   { id:"network",     label:"Red" },
@@ -67,6 +67,7 @@ function openModal(name) {
   if (name === "scanlog") renderScanLogInModal();
   if (name === "audit") renderAuditLogInModal();
   if (name === "apikeys" && adminConfig) renderKeysInModal();
+  if (name === "sellers" && adminConfig) renderSellersInModal();
 }
 
 function closeModal(e) {
@@ -108,6 +109,12 @@ function rebindModalHandlers(name) {
     if (addBtn) addBtn.onclick = addKeyHandler;
     if (eyeBtn) eyeBtn.onclick = () => { const inp = body.querySelector("#api-key-in"); if(inp) inp.type = inp.type === "password" ? "text" : "password"; };
     if (sel) sel.onchange = async () => { if (!authedOnly()) return; await updateAdminConfig({ ai_model: sel.value }); toast("Modelo actualizado"); };
+  }
+  if (name === "sellers") {
+    const body = $("modal-body");
+    if (adminConfig) renderSellersInModal();
+    const addBtn = body.querySelector("#sel-add");
+    if (addBtn) addBtn.onclick = addSellerHandler;
   }
   if (name === "messages") {
     const body = $("modal-body");
