@@ -78,13 +78,32 @@ async function deletePart(partId) {
   } catch(e) { toast("Error al eliminar"); }
 }
 
+async function loadVentas(append) {
+  try {
+    const offset = append ? salesPage * SALES_PAGE_SIZE : 0;
+    const params = `/rest/v1/ventas?select=id,data,created_at&order=created_at.desc&limit=${SALES_PAGE_SIZE}&offset=${offset}`;
+    const data = await sbFetch(params, "GET");
+    if (!append) {
+      ventas = (data || []).map(d => ({ id: d.id, ...(d.data || {}), created_at: d.created_at }));
+      const cr = await fetch(`${SB_URL}/rest/v1/ventas?select=id&limit=0`, { headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Prefer": "count=exact" } });
+      if (cr.ok) salesTotal = parseInt(cr.headers.get("content-range")?.split("/")[1] || cr.headers.get("x-total-count") || "0", 10) || 0;
+    } else {
+      const more = (data || []).map(d => ({ id: d.id, ...(d.data || {}), created_at: d.created_at }));
+      ventas = ventas.concat(more);
+    }
+    salesPage = append ? salesPage + 1 : 1;
+    if (isModalOpen("sales")) renderSalesInModal();
+  } catch(e) { console.error("loadVentas:", e); toast("Error al cargar ventas"); }
+}
+
 async function loadAllData() {
   await loadAdminConfig();
   await Promise.all([
     loadParts(),
     loadDevices(),
     loadScanLogs(false),
-    loadAuditLogs(false)
+    loadAuditLogs(false),
+    loadVentas(false)
   ]);
   allLoaded = true;
 }
