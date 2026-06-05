@@ -153,6 +153,70 @@ async function addKeyHandler() {
   setTimeout(() => { if (st) st.textContent = ""; }, 2000);
 }
 
+function renderSellersInModal() {
+  const body = $("modal-body");
+  const el = body?.querySelector("#sellers-list"); if (!el) return;
+  let sellers = adminConfig?.sellers || [];
+  if (typeof sellers === "string") { try { sellers = JSON.parse(sellers); } catch(_) { sellers = []; } }
+  el.innerHTML = "";
+  if (!sellers.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--t4);text-align:center;padding:6px">Sin vendedores configurados</div>';
+    return;
+  }
+  sellers.forEach((s, i) => {
+    const row = document.createElement("div");
+    row.className = "key-row";
+    row.innerHTML = `
+      <span style="flex:1;font-weight:600">${escH(s.name||"Vendedor")}</span>
+      <span style="color:var(--t3);font-size:11px;margin:0 10px">PIN: ${"•".repeat(String(s.pin||"").length)}</span>
+      <span style="color:var(--t4);font-size:10px;cursor:pointer" onclick="window.toggleSellerPin(${i})">👁</span>
+      <button class="key-del" onclick="window.removeSeller(${i})">X</button>`;
+    el.appendChild(row);
+  });
+}
+
+window.toggleSellerPin = function(i) {
+  const sellers = adminConfig?.sellers || [];
+  const s = sellers[i];
+  if (!s) return;
+  const row = document.querySelectorAll("#sellers-list .key-row")[i];
+  if (!row) return;
+  const span = row.querySelector("span:nth-child(2)");
+  if (span) span.textContent = span.textContent.includes("PIN:")
+    ? `PIN: ${s.pin}`
+    : `PIN: ${"•".repeat(String(s.pin||"").length)}`;
+};
+
+window.removeSeller = async function(i) {
+  if (!authedOnly()) return;
+  const sellers = adminConfig?.sellers || [];
+  sellers.splice(i, 1);
+  await updateAdminConfig({ sellers });
+  renderSellersInModal();
+  toast("Vendedor eliminado");
+};
+
+async function addSellerHandler() {
+  if (!authedOnly()) return;
+  const body = $("modal-body");
+  const nameInp = body?.querySelector("#sel-name-in");
+  const pinInp = body?.querySelector("#sel-pin-in");
+  const st = body?.querySelector("#sel-status");
+  const name = (nameInp?.value||"").trim();
+  const pin = (pinInp?.value||"").trim();
+  if (!name) { if (st) { st.textContent = "Ingresá un nombre"; st.style.color = "var(--red-lt)"; } return; }
+  if (!pin || pin.length < 3) { if (st) { st.textContent = "El PIN debe tener al menos 3 caracteres"; st.style.color = "var(--red-lt)"; } return; }
+  const sellers = adminConfig?.sellers || [];
+  if (sellers.some(s => s.pin === pin)) { if (st) { st.textContent = "Ese PIN ya está en uso"; st.style.color = "var(--amber-lt)"; } return; }
+  sellers.push({ name, pin });
+  await updateAdminConfig({ sellers });
+  if (nameInp) nameInp.value = "";
+  if (pinInp) pinInp.value = "";
+  if (st) { st.textContent = `${name} agregado como vendedor`; st.style.color = "var(--green-lt)"; }
+  renderSellersInModal();
+  setTimeout(() => { if (st) st.textContent = ""; }, 2000);
+}
+
 // ---
 // DEVICES (inside modal, dual view)
 // ---
