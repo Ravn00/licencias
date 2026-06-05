@@ -1,6 +1,7 @@
 let parts = [];
 let devices = [];
 let scanLogs = [];
+let ventas = [];
 
 let catFilter = "all";
 let catSearch = "";
@@ -17,11 +18,17 @@ let auditPage = 0;
 let auditTotal = 0;
 const AUDIT_PAGE_SIZE = 50;
 
+let salesPage = 0;
+let salesTotal = 0;
+let salesSearch = "";
+let salesFilter = "all";
+const SALES_PAGE_SIZE = 50;
+
 let confirmCb = null;
 const $ = id => document.getElementById(id);
 
-const modalNames = { catalog:"Catálogo", apikeys:"API Keys", sellers:"Vendedores", devices:"Dispositivos", scanlog:"Historial", messages:"Mensajes", maintenance:"Mantenimiento", license:"Licencias", diagnostics:"Diagnóstico", audit:"Auditoría" };
-const modalIcons = { catalog:"[cat]", apikeys:"[key]", sellers:"[sel]", devices:"[dev]", scanlog:"[log]", messages:"[msg]", maintenance:"[mnt]", license:"[lic]", diagnostics:"[diag]", audit:"[aud]" };
+const modalNames = { catalog:"Catálogo", apikeys:"API Keys", sellers:"Vendedores", sales:"Ventas", devices:"Dispositivos", scanlog:"Historial", messages:"Mensajes", maintenance:"Mantenimiento", license:"Licencias", diagnostics:"Diagnóstico", audit:"Auditoría" };
+const modalIcons = { catalog:"[cat]", apikeys:"[key]", sellers:"[sel]", sales:"[sal]", devices:"[dev]", scanlog:"[log]", messages:"[msg]", maintenance:"[mnt]", license:"[lic]", diagnostics:"[diag]", audit:"[aud]" };
 
 const DIAG_ITEMS = [
   { id:"network",     label:"Red" },
@@ -68,6 +75,7 @@ function openModal(name) {
   if (name === "audit") renderAuditLogInModal();
   if (name === "apikeys" && adminConfig) renderKeysInModal();
   if (name === "sellers" && adminConfig) renderSellersInModal();
+  if (name === "sales" && ventas.length) renderSalesInModal();
 }
 
 function closeModal(e) {
@@ -82,6 +90,28 @@ function rebindModalHandlers(name) {
     const body = $("modal-body");
     const search = body.querySelector("#cat-search");
     if (search) search.oninput = () => { catSearch = search.value.toLowerCase(); renderCatalogInModal(); };
+  }
+  if (name === "sales") {
+    const body = $("modal-body");
+    if (ventas.length) renderSalesInModal();
+    const s = body.querySelector("#sales-search"); const f = body.querySelector("#sales-filter");
+    const r = body.querySelector("#sales-refresh"); const m = body.querySelector("#sales-load-more");
+    const ex = body.querySelector("#sales-export");
+    if (s) s.oninput = () => { salesSearch = s.value.toLowerCase(); renderSalesInModal(); };
+    if (f) f.onchange = () => { salesFilter = f.value; renderSalesInModal(); };
+    if (r) r.onclick = () => { salesPage = 0; loadVentas(false); };
+    if (m) m.onclick = () => { loadVentas(true); };
+    if (ex) ex.onclick = () => {
+      if (!ventas.length) { toast("Sin ventas para exportar"); return; }
+      const wb = XLSX.utils.book_new();
+      const rows = ventas.map(v => [v.fecha||"", v.vendedor||"Anónimo", (v.items||[]).map(it=>`${it.marca} ${it.modelo}`).join(", "), v.total||0, v.comision||0]);
+      const data = [["Fecha","Vendedor","Parte","Total","Comisión 10%"], ...rows];
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      ws["!cols"]=[{wch:20},{wch:14},{wch:30},{wch:12},{wch:12}];
+      XLSX.utils.book_append_sheet(wb, ws, "Ventas");
+      XLSX.writeFile(wb, `ventas-${new Date().toISOString().slice(0,10)}.xlsx`);
+      toast("Excel descargado");
+    };
   }
   if (name === "scanlog") {
     const body = $("modal-body");
