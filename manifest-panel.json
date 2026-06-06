@@ -1,7 +1,7 @@
 {
-  "name": "Panel de Licencias",
-  "short_name": "Licencias",
-  "description": "Generador de licencias AutoParts",
+  "name": "A-CAP — Panel Admin",
+  "short_name": "A-CAP",
+  "description": "Panel de administración de autopartes",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
