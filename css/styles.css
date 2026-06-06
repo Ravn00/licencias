@@ -264,7 +264,7 @@ body{transition:background .3s,color .3s}
 #main-area{flex:1;min-width:0;padding:20px;display:flex;flex-direction:column}
 
 /* --- Dashboard Stats --- */
-.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px}
 .dash-card{background:var(--s1);border:1px solid var(--bdr2);border-radius:var(--r12);padding:18px 16px;text-align:center;transition:box-shadow .2s,border-color .2s;animation:fadeUp .25s ease;box-shadow:var(--card-shadow)}
 .dash-card:hover{box-shadow:var(--card-shadow-hover);border-color:var(--bdr3)}
 .dash-card:nth-child(2){animation-delay:.05s}
