@@ -13,7 +13,7 @@ window.addEventListener("load", async () => {
     loadAllData();
   }
   $("pw-input").focus();
-  if ("serviceWorker" in navigator) navigator.serviceWorker.getRegistrations().then(r => r.forEach(r => r.unregister()));
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
   const stored = localStorage.getItem('ap_theme_panel');
   if (stored === 'light') document.documentElement.classList.add('light');
 });
