@@ -10,6 +10,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="A-CAP"/>
 <link rel="manifest" href="manifest-panel.json"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="stylesheet" href="css/styles.css"/>
@@ -35,7 +38,7 @@
     <div class="sidebar-inner" style="display:flex;flex-direction:column;height:100%">
       <div id="sidebar-brand">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>A-CAP</span>
+        <span>A-CAP <span style="font-size:7px;color:var(--t5);letter-spacing:3px;font-weight:300;text-transform:uppercase;opacity:.5;user-select:none;margin-left:2px">by: ravn</span></span>
       </div>
       <div id="sidebar-nav">
         <button class="snav-item" onclick="openModal('catalog')">
@@ -119,62 +122,66 @@
             <div class="dash-label">Vendidas</div>
           </div>
           <div class="dash-card">
+            <div class="dash-val reserv" id="dash-resv">0</div>
+            <div class="dash-label">Reservadas</div>
+          </div>
+          <div class="dash-card">
             <div class="dash-val default" id="dash-devices">0</div>
             <div class="dash-label">Dispositivos</div>
             <div class="dash-sub" id="dash-active-devices">activos</div>
           </div>
         </div>
         <div class="dash-sections">
-          <div class="dash-section-btn" onclick="openModal('catalog')">
+          <button class="dash-section-btn" onclick="openModal('catalog')" aria-label="Abrir catálogo">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-            <div class="ds-label">Catálogo</div>
-            <div class="ds-sub">Administrar partes</div>
-          </div>
-          <div class="dash-section-btn" onclick="openModal('apikeys')">
+            <span class="ds-label">Catálogo</span>
+            <span class="ds-sub">Administrar partes</span>
+          </button>
+          <button class="dash-section-btn" onclick="openModal('apikeys')" aria-label="Abrir API Keys">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
-            <div class="ds-label">API Keys</div>
-            <div class="ds-sub">Claves de IA</div>
-          </div>
-          <div class="dash-section-btn" onclick="openModal('sales')">
+            <span class="ds-label">API Keys</span>
+            <span class="ds-sub">Claves de IA</span>
+          </button>
+          <button class="dash-section-btn" onclick="openModal('sales')" aria-label="Abrir ventas">
             <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            <div class="ds-label">Ventas</div>
-            <div class="ds-sub">Comisiones por vendedor</div>
-          </div>
-          <div class="dash-section-btn" onclick="openModal('devices')">
+            <span class="ds-label">Ventas</span>
+            <span class="ds-sub">Comisiones por vendedor</span>
+          </button>
+          <button class="dash-section-btn" onclick="openModal('devices')" aria-label="Abrir dispositivos">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1h6"/><path d="M9 23h6"/><path d="M12 21v-2"/></svg>
-            <div class="ds-label">Dispositivos</div>
-            <div class="ds-sub">Monitoreo</div>
-          </div>
-          <div class="dash-section-btn" onclick="openModal('scanlog')">
+            <span class="ds-label">Dispositivos</span>
+            <span class="ds-sub">Monitoreo</span>
+          </button>
+          <button class="dash-section-btn" onclick="openModal('scanlog')" aria-label="Abrir historial">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            <div class="ds-label">Historial</div>
-            <div class="ds-sub">Escaneos</div>
-          </div>
-          <div class="dash-section-btn" onclick="openModal('audit')">
+            <span class="ds-label">Historial</span>
+            <span class="ds-sub">Escaneos</span>
+          </button>
+          <button class="dash-section-btn" onclick="openModal('audit')" aria-label="Abrir auditoría">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <div class="ds-label">Auditoría</div>
-            <div class="ds-sub">Cambios</div>
-          </div>
-          <div class="dash-section-btn" onclick="openModal('messages')">
+            <span class="ds-label">Auditoría</span>
+            <span class="ds-sub">Cambios</span>
+          </button>
+          <button class="dash-section-btn" onclick="openModal('messages')" aria-label="Abrir mensajes">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            <div class="ds-label">Mensajes</div>
-            <div class="ds-sub">Banner admin</div>
-          </div>
-          <div class="dash-section-btn" onclick="openModal('maintenance')">
+            <span class="ds-label">Mensajes</span>
+            <span class="ds-sub">Banner admin</span>
+          </button>
+          <button class="dash-section-btn" onclick="openModal('maintenance')" aria-label="Abrir mantenimiento">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-            <div class="ds-label">Mantenimiento</div>
-            <div class="ds-sub">Configuración</div>
-          </div>
-          <div class="dash-section-btn" onclick="openModal('license')">
+            <span class="ds-label">Mantenimiento</span>
+            <span class="ds-sub">Configuración</span>
+          </button>
+          <button class="dash-section-btn" onclick="openModal('license')" aria-label="Abrir licencias">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <div class="ds-label">Licencias</div>
-            <div class="ds-sub">IA y accesos</div>
-          </div>
-          <div class="dash-section-btn" onclick="openModal('diagnostics')">
+            <span class="ds-label">Licencias</span>
+            <span class="ds-sub">IA y accesos</span>
+          </button>
+          <button class="dash-section-btn" onclick="openModal('diagnostics')" aria-label="Abrir diagnóstico">
             <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            <div class="ds-label">Diagnóstico</div>
-            <div class="ds-sub">Verificar sistema</div>
-          </div>
+            <span class="ds-label">Diagnóstico</span>
+            <span class="ds-sub">Verificar sistema</span>
+          </button>
         </div>
       </div>
     </div>
@@ -191,6 +198,7 @@
   <div class="cat-tools">
     <button class="filter-pill on" data-f="all" onclick="setCatFilter('all')">Todas</button>
     <button class="filter-pill" data-f="avail" onclick="setCatFilter('avail')">Disponibles</button>
+    <button class="filter-pill" data-f="resv" onclick="setCatFilter('resv')">Reservadas</button>
     <button class="filter-pill" data-f="sold" onclick="setCatFilter('sold')">Vendidas</button>
     <span style="flex:1"></span>
     <button class="btn-ghost btn-sm" onclick="exportExcel()" title="Exportar el catálogo a Excel con fotos incluidas">Exportar Excel</button>
@@ -213,7 +221,7 @@
       <div style="flex:1;position:relative">
         <input id="api-key-in" type="password" placeholder="Ingresa nueva API key"
           style="width:100%;background:var(--s2);border:1px solid var(--bdr2);color:var(--text);padding:8px 34px 8px 10px;border-radius:var(--r6);font-size:12px"/>
-        <button id="api-eye" title="Mostrar u ocultar la API key" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;display:flex;align-items:center;padding:0">
+        <button id="api-eye" aria-label="Mostrar u ocultar la API key" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;display:flex;align-items:center;padding:0">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
       </div>
@@ -529,12 +537,12 @@
 
 <!-- LIGHTBOX -->
 <div id="lightbox" onclick="closeLightbox()">
-  <button id="lb-close" onclick="event.stopPropagation();closeLightbox()">&times;</button>
+  <button id="lb-close" aria-label="Cerrar imagen" onclick="event.stopPropagation();closeLightbox()">&times;</button>
   <img id="lb-img" src="" alt="" onclick="event.stopPropagation()"/>
 </div>
 
 <!-- TOAST -->
-<div id="toast"></div>
+<div id="toast" aria-live="polite"></div>
 
 <script src="js/config.js"></script>
 <script src="js/supabase.js"></script>
