@@ -5,6 +5,7 @@ let adminPasswordHash = "";
 let authed = false;
 let adminConfig = null;
 let allLoaded = false;
+let writeToken = "";
 
 function authedOnly() { if (!authed) { window.location.reload(); return false; } return true; }
 
@@ -84,7 +85,7 @@ async function sbFetch(path, method="GET", body=null) {
       console.error("sbFetch error:", method, path, res.status);
       return null;
     }
-    if (method === "DELETE" || method === "PATCH") return null;
+    if (method === "DELETE" || method === "PATCH") return true;
     const ct = res.headers.get("content-type") || "";
     if (ct.includes("json")) return res.json();
     return null;
@@ -108,6 +109,37 @@ async function sbFetchAll(path) {
   return all;
 }
 
+async function apiProxy(table, method, body, query) {
+  if (!writeToken) { console.warn("apiProxy: no write token"); return null; }
+  try {
+    const res = await fetch(`${SB_URL}/functions/v1/api-proxy`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-write-token": writeToken },
+      body: JSON.stringify({ table, method, body, query: query || "" })
+    });
+    if (!res.ok) { console.warn("apiProxy error:", res.status); return null; }
+    return true;
+  } catch(e) { console.warn("apiProxy error:", e.message); return null; }
+}
+
+async function resetAllData() {
+  const step1 = confirm("⚠️ RESET TOTAL\n\nEsto eliminará TODOS los datos:\n• Catálogo completo\n• Ventas registradas\n• Historial de escaneos\n• Dispositivos\n• Configuración\n\n¿Estás seguro?");
+  if (!step1) return;
+  const step2 = confirm("ÚLTIMA ADVERTENCIA\n\nEsta acción NO se puede deshacer.\nTodo el localStorage y los datos en Supabase serán eliminados.\n\n¿Confirmas?");
+  if (!step2) return;
+  localStorage.clear();
+  if (writeToken) {
+    try {
+      await fetch(`${SB_URL}/functions/v1/api-proxy`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-write-token": writeToken },
+        body: JSON.stringify({ action: "reset-all" })
+      });
+    } catch(e) { console.warn("reset-all error:", e); }
+  }
+  location.reload();
+}
+
 async function loadAdminConfig() {
   try {
     const data = await sbFetch("/rest/v1/admin_config?select=*&limit=1", "GET");
@@ -118,6 +150,7 @@ async function loadAdminConfig() {
       }
       if (!Array.isArray(adminConfig.api_keys)) adminConfig.api_keys = [];
       if (adminConfig.password_hash) adminPasswordHash = adminConfig.password_hash;
+      writeToken = adminConfig.write_token || "";
     } else { adminConfig = null; }
   } catch(e) { console.warn("loadAdminConfig:", e); adminConfig = null; }
   return adminConfig;
@@ -127,21 +160,11 @@ async function upsertAdminConfig(payload) {
   const hasExisting = adminConfig && adminConfig.id;
   if (hasExisting) {
     delete payload.id;
-    const opts = {
-      method: "PATCH",
-      headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
-      body: JSON.stringify(payload)
-    };
-    const res = await fetch(SB_URL + "/rest/v1/admin_config?id=eq.global", opts);
-    if (!res.ok) { const t = await res.text(); console.warn("upsertAdminConfig PATCH:", res.status, t.slice(0,100)); return null; }
+    const ok = await apiProxy("admin_config", "PATCH", payload, "?id=eq.global");
+    if (!ok) await sbFetch("/rest/v1/admin_config?id=eq.global", "PATCH", payload);
   } else {
-    const opts = {
-      method: "POST",
-      headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
-      body: JSON.stringify({ id: "global", ...payload })
-    };
-    const res = await fetch(SB_URL + "/rest/v1/admin_config", opts);
-    if (!res.ok) { const t = await res.text(); console.warn("upsertAdminConfig POST:", res.status, t.slice(0,100)); return null; }
+    const ok = await apiProxy("admin_config", "POST", { id: "global", ...payload });
+    if (!ok) await sbFetch("/rest/v1/admin_config", "POST", { id: "global", ...payload });
   }
 }
 
