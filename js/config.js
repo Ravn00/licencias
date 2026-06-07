@@ -42,7 +42,7 @@ async function doLogin() {
 
 async function loadAdminConfig() {
   try {
-    const data = await sbFetch("/rest/v1/admin_config?select=*&limit=1", "GET");
+    const data = await apiProxyRead("admin_config", "*", "&limit=1");
     if (data && data.length > 0) {
       adminConfig = data[0];
       if (typeof adminConfig.api_keys === "string") {
@@ -60,11 +60,9 @@ async function upsertAdminConfig(payload) {
   const hasExisting = adminConfig && adminConfig.id;
   if (hasExisting) {
     delete payload.id;
-    const ok = await apiProxy("admin_config", "PATCH", payload, "?id=eq.global");
-    if (!ok) await sbFetch("/rest/v1/admin_config?id=eq.global", "PATCH", payload);
+    await apiProxy("admin_config", "PATCH", payload, "?id=eq.global");
   } else {
-    const ok = await apiProxy("admin_config", "POST", { id: "global", ...payload });
-    if (!ok) await sbFetch("/rest/v1/admin_config", "POST", { id: "global", ...payload });
+    await apiProxy("admin_config", "POST", { id: "global", ...payload });
   }
 }
 

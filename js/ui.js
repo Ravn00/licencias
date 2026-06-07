@@ -82,7 +82,7 @@ async function diagNetwork() {
 async function diagSupabase() {
   const t0 = Date.now();
   try {
-    const data = await sbFetch("/rest/v1/admin_config?select=id&limit=1", "GET");
+    const data = await apiProxyRead("admin_config", "id", "&limit=1");
     const ms = Date.now() - t0;
     if (Array.isArray(data)) return { status:"ok", message:`Conexión exitosa (${ms}ms)` };
     return { status:"err", message:`Respuesta inesperada (${ms}ms)` };
@@ -102,7 +102,7 @@ async function diagApiKeys() {
 }
 
 async function diagTablaAdmin() {
-  const d = await sbFetch("/rest/v1/admin_config?select=id&limit=1", "GET");
+  const d = await apiProxyRead("admin_config", "id", "&limit=1");
   if (Array.isArray(d)) return { status:"ok", message:`${d.length} fila(s)` };
   return { status:"err", message:"No accesible" };
 }

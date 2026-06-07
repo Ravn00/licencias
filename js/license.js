@@ -21,7 +21,7 @@ async function licGenHandler() {
   let secret = adminConfig?.license_secret || "";
   if (!secret) {
     try {
-      const cfg = await sbFetch("/rest/v1/admin_config?select=license_secret&limit=1");
+      const cfg = await apiProxyRead("admin_config", "license_secret", "&limit=1");
       secret = (cfg && cfg[0]?.license_secret) || "";
     } catch(e) { secret = ""; }
   }
