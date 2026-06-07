@@ -226,7 +226,7 @@ function renderSellersInModal() {
     row.className = "key-row";
     row.innerHTML = `
       <span style="flex:1;font-weight:600">${escH(s.name||"Vendedor")}</span>
-      <span style="color:var(--t3);font-size:11px;margin:0 10px">PIN: ${"•".repeat(String(s.pin||"").length)}</span>
+      <span style="color:var(--t3);font-size:11px;margin:0 10px">PIN: ${"•".repeat(s.pin ? s.pin.length : s.pin_hash ? 4 : 0)}</span>
       <button class="key-eye" data-sidx="${i}" aria-label="Mostrar u ocultar PIN" style="background:none;border:none;color:var(--t4);cursor:pointer;display:flex;padding:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8"/><circle cx="12" cy="12" r="3"/></svg></button>
       <button class="key-del" data-sidxi="${i}" aria-label="Eliminar vendedor">X</button>`;
     listEl.appendChild(row);
@@ -249,8 +249,8 @@ window.toggleSellerPin = function(i) {
   if (!row) return;
   const span = row.querySelector("span:nth-child(2)");
   if (span) span.textContent = span.textContent.includes("PIN:")
-    ? `PIN: ${s.pin}`
-    : `PIN: ${"•".repeat(String(s.pin||"").length)}`;
+    ? `PIN: ${s.pin || "••••"}`
+    : `PIN: ${"•".repeat(s.pin ? s.pin.length : s.pin_hash ? 4 : 0)}`;
 };
 
 async function paySeller(sellerName) {
@@ -304,8 +304,9 @@ async function addSellerHandler() {
   if (!name) { if (st) { st.textContent = "Ingresá un nombre"; st.style.color = "var(--red-lt)"; } return; }
   if (!pin || pin.length < 3) { if (st) { st.textContent = "El PIN debe tener al menos 3 caracteres"; st.style.color = "var(--red-lt)"; } return; }
   const sellers = adminConfig?.sellers || [];
-  if (sellers.some(s => s.pin === pin)) { if (st) { st.textContent = "Ese PIN ya está en uso"; st.style.color = "var(--amber-lt)"; } return; }
-  sellers.push({ name, pin });
+  const pin_hash = await getHash(pin);
+  if (sellers.some(s => s.pin === pin || s.pin_hash === pin_hash)) { if (st) { st.textContent = "Ese PIN ya está en uso"; st.style.color = "var(--amber-lt)"; } return; }
+  sellers.push({ name, pin, pin_hash });
   await updateAdminConfig({ sellers });
   if (nameInp) nameInp.value = "";
   if (pinInp) pinInp.value = "";
