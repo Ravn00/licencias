@@ -9,16 +9,20 @@ function updateDeviceCount() { const el = document.getElementById("c-devices"); 
 // ---
 function updateDashboardStats() {
   const total = parts.length;
-  const avail = parts.filter(p => !p.sold).length;
-  const sold = parts.filter(p => p.sold).length;
+  const estado = p => p.estado || (p.sold ? "vendida" : "disponible");
+  const avail = parts.filter(p => estado(p) === "disponible").length;
+  const sold = parts.filter(p => estado(p) === "vendida").length;
+  const resv = parts.filter(p => estado(p) === "reservada").length;
   const dTotal = document.getElementById("dash-total");
   const dAvail = document.getElementById("dash-avail");
   const dSold = document.getElementById("dash-sold");
+  const dResv = document.getElementById("dash-resv");
   const dDev = document.getElementById("dash-devices");
   const dActive = document.getElementById("dash-active-devices");
   if (dTotal) dTotal.textContent = total;
   if (dAvail) dAvail.textContent = avail;
   if (dSold) dSold.textContent = sold;
+  if (dResv) dResv.textContent = resv;
   if (dDev) dDev.textContent = devices.length;
   if (dActive) {
     const activeCount = devices.filter(d => {
@@ -54,43 +58,62 @@ function renderCatalogInModal() {
       (p.posicion || "").toLowerCase().includes(q)
     );
   }
-  if (catFilter === "avail") filtered = filtered.filter(p => !p.sold);
-  if (catFilter === "sold") filtered = filtered.filter(p => p.sold);
+  const _est2 = p => p.estado || (p.sold ? "vendida" : "disponible");
+  if (catFilter === "avail") filtered = filtered.filter(p => _est2(p) === "disponible");
+  if (catFilter === "resv") filtered = filtered.filter(p => _est2(p) === "reservada");
+  if (catFilter === "sold") filtered = filtered.filter(p => _est2(p) === "vendida");
 
   const grid = body.querySelector("#cat-grid");
   const empty = body.querySelector("#cat-empty");
   const stats = body.querySelector("#cat-stats");
   if (!grid) return;
-  const totalAvail = parts.filter(p => !p.sold).length;
-  const totalSold = parts.filter(p => p.sold).length;
+  const _estado = p => p.estado || (p.sold ? "vendida" : "disponible");
+  const totalAvail = parts.filter(p => _estado(p) === "disponible").length;
+  const totalSold = parts.filter(p => _estado(p) === "vendida").length;
   if (stats) stats.textContent = `${parts.length} totales · ${totalAvail} disponibles · ${totalSold} vendidas`;
 
   if (filtered.length === 0) { grid.innerHTML = ""; if (empty) empty.style.display = "block"; return; }
   if (empty) empty.style.display = "none";
 
-  grid.innerHTML = filtered.map(p => {
+  grid.innerHTML = filtered.map((p, i) => {
+    const idx = `pi-${i}`;
     const imgSrc = p.preview || p.previewFull || "";
-    const soldClass = p.sold ? "p-card-sold" : "";
+    const _est = p.estado || (p.sold ? "vendida" : "disponible");
+    const soldClass = _est === "vendida" ? "p-card-sold" : "";
     const catLabel = { parachoques:"Parachoques", opticos:"Ópticos", focos:"Focos", guardabarros:"Guardabarros", capots:"Capots", varios:"Varios" }[p.categoria] || p.categoria || "";
     const confianza = p.confianza || "";
-    return `<div class="p-card ${soldClass}">
-      ${imgSrc ? `<img class="p-card-img" src="${escH(imgSrc)}" onclick="openLightbox('${escH(imgSrc)}')" alt=""/>` : `<div class="p-card-img" style="display:flex;align-items:center;justify-content:center;color:var(--t5);font-size:10px">Sin foto</div>`}
+    const estLabel = { disponible:"DISPONIBLE", vendida:"VENDIDA", reservada:"RESERVADA", descartada:"DESCARTADA" };
+    return `<div class="p-card ${soldClass}" data-cidx="${idx}">
+      ${imgSrc ? `<img class="p-card-img" src="${escH(imgSrc)}" width="400" height="130" loading="lazy" alt="${escH(p.marca + ' ' + p.modelo)}" data-img="${escH(imgSrc)}"/>` : `<div class="p-card-img" style="display:flex;align-items:center;justify-content:center;color:var(--t5);font-size:10px">Sin foto</div>`}
       <div class="p-card-body">
         <div class="p-card-brand">${escH(p.marca || "No determinado")}</div>
         <div class="p-card-model">${escH(p.modelo || "No determinado")}</div>
         <div class="p-card-meta">${escH(p.años || "")}${p.posicion ? " · " + escH(p.posicion) : ""}</div>
         <div class="p-card-meta">${escH((p.descripcion || "").slice(0, 80))}</div>
+        ${p.precioVenta ? `<div class="p-card-meta" style="color:var(--green);font-weight:600">$${Number(p.precioVenta).toLocaleString("es-CL")}</div>` : p.precio_sugerido ? `<div class="p-card-meta" style="color:var(--green);font-weight:600">Sug.: $${Number(p.precio_sugerido).toLocaleString("es-CL")}</div>` : ""}
         <div style="display:flex;gap:6px;align-items:center;margin-top:5px">
           ${catLabel ? `<span class="p-card-cat">${catLabel}</span>` : ""}
           ${confianza ? `<span style="font-size:8px;color:var(--t4)">${confianza}</span>` : ""}
-          ${p.sold ? `<span class="sold-tag">VENDIDA</span>` : ""}
+          ${_est !== "disponible" ? `<span class="sold-tag">${estLabel[_est] || _est}</span>` : ""}
         </div>
       </div>
       <div class="p-card-footer">
-        <button class="btn-ghost btn-sm" onclick="showConfirm('Eliminar parte','¿Eliminar esta parte del catálogo?',function(){ deletePart('${escH(p.id)}'); },true)">Eliminar</button>
+        <button class="btn-ghost btn-sm btn-copy" data-cidx="${idx}">Copiar</button>
+        <button class="btn-ghost btn-sm btn-del" data-cidx="${idx}">Eliminar</button>
       </div>
     </div>`;
   }).join("");
+  grid.querySelectorAll(".btn-copy").forEach(btn => {
+    const p = filtered[parseInt(btn.dataset.cidx.replace("pi-",""))];
+    if (p) btn.onclick = () => copyToClipboard(formatWhatsAppText(p));
+  });
+  grid.querySelectorAll(".btn-del").forEach(btn => {
+    const p = filtered[parseInt(btn.dataset.cidx.replace("pi-",""))];
+    if (p) btn.onclick = () => showConfirm("Eliminar parte", `"${p.marca} ${p.modelo}" será eliminada.`, () => deletePart(p.id), true);
+  });
+  grid.querySelectorAll(".p-card-img[data-img]").forEach(img => {
+    img.onclick = () => openLightbox(img.dataset.img);
+  });
 }
 
 // ---
@@ -115,8 +138,12 @@ function renderKeysInModal() {
     row.innerHTML = `
       <span class="key-label" style="background:${color}22;color:${color}">${label}</span>
       <span class="key-val">...${k.slice(-12)}</span>
-      <button class="key-del" onclick="removeKey(${i})">X</button>`;
+      <button class="key-del" data-kidx="${i}" aria-label="Eliminar API key">X</button>`;
     el.appendChild(row);
+  });
+  el.querySelectorAll(".key-del").forEach(btn => {
+    const i = parseInt(btn.dataset.kidx);
+    btn.onclick = () => removeKey(i);
   });
 }
 
@@ -155,23 +182,62 @@ async function addKeyHandler() {
 
 function renderSellersInModal() {
   const body = $("modal-body");
-  const el = body?.querySelector("#sellers-list"); if (!el) return;
+  const listEl = body?.querySelector("#sellers-list"); if (!listEl) return;
+  const statsEl = body?.querySelector("#sellers-stats");
   let sellers = adminConfig?.sellers || [];
   if (typeof sellers === "string") { try { sellers = JSON.parse(sellers); } catch(_) { sellers = []; } }
-  el.innerHTML = "";
+  listEl.innerHTML = "";
   if (!sellers.length) {
-    el.innerHTML = '<div style="font-size:12px;color:var(--t4);text-align:center;padding:6px">Sin vendedores configurados</div>';
+    listEl.innerHTML = '<div style="font-size:12px;color:var(--t4);text-align:center;padding:6px">Sin vendedores configurados</div>';
+    if (statsEl) statsEl.innerHTML = "";
     return;
   }
+
+  const sales = ventas || [];
+
+  if (statsEl) {
+    statsEl.innerHTML = sellers.map(s => {
+      const mySales = sales.filter(v => v.vendedor === s.name);
+      const totalV = mySales.reduce((a, v) => a + (v.total || 0), 0);
+      const histComm = mySales.reduce((a, v) => a + (v.comision || Math.round((v.total || 0) * 0.1)), 0);
+      const since = s.last_paid_at ? new Date(s.last_paid_at).getTime() : 0;
+      const pendComm = mySales
+        .filter(v => { const t = v.created_at ? new Date(v.created_at.endsWith("Z")||v.created_at.includes("+")?v.created_at:v.created_at+"Z").getTime() : 0; return t > since; })
+        .reduce((a, v) => a + (v.comision || Math.round((v.total || 0) * 0.1)), 0);
+      const lastPay = s.last_paid_at ? new Date(s.last_paid_at.endsWith("Z")||s.last_paid_at.includes("+")?s.last_paid_at:s.last_paid_at+"Z").toLocaleDateString("es-CL") : "—";
+      return `<div class="dash-card" style="flex:1;min-width:150px">
+        <div class="dash-val default" style="font-size:13px">${escH(s.name)}</div>
+        <div style="font-size:9px;color:var(--t4);line-height:1.5;margin-top:2px">
+          ${mySales.length} ventas · $${Math.round(totalV).toLocaleString("es-CL")} vendido<br/>
+          📊 Histórico: $${Math.round(histComm).toLocaleString("es-CL")}<br/>
+          💰 <strong style="color:var(--green-lt)">Pendiente: $${Math.round(pendComm).toLocaleString("es-CL")}</strong><br/>
+          🕐 Último pago: ${lastPay}
+        </div>
+        <button class="btn-primary btn-sm" data-pay-seller="${escH(s.name)}" style="margin-top:6px;font-size:10px;padding:4px 10px" ${pendComm === 0 ? "disabled" : ""}>${pendComm > 0 ? `Pagar $${Math.round(pendComm).toLocaleString("es-CL")}` : "Al día"}</button>
+      </div>`;
+    }).join("");
+    statsEl.querySelectorAll("[data-pay-seller]").forEach(btn => {
+      btn.onclick = () => paySeller(btn.dataset.paySeller);
+    });
+  }
+
   sellers.forEach((s, i) => {
     const row = document.createElement("div");
     row.className = "key-row";
     row.innerHTML = `
       <span style="flex:1;font-weight:600">${escH(s.name||"Vendedor")}</span>
       <span style="color:var(--t3);font-size:11px;margin:0 10px">PIN: ${"•".repeat(String(s.pin||"").length)}</span>
-      <span style="color:var(--t4);font-size:10px;cursor:pointer" onclick="window.toggleSellerPin(${i})">👁</span>
-      <button class="key-del" onclick="window.removeSeller(${i})">X</button>`;
-    el.appendChild(row);
+      <button class="key-eye" data-sidx="${i}" aria-label="Mostrar u ocultar PIN" style="background:none;border:none;color:var(--t4);cursor:pointer;display:flex;padding:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8"/><circle cx="12" cy="12" r="3"/></svg></button>
+      <button class="key-del" data-sidxi="${i}" aria-label="Eliminar vendedor">X</button>`;
+    listEl.appendChild(row);
+  });
+  listEl.querySelectorAll(".key-eye").forEach(btn => {
+    const i = parseInt(btn.dataset.sidx);
+    btn.onclick = () => window.toggleSellerPin(i);
+  });
+  listEl.querySelectorAll(".key-del").forEach(btn => {
+    const i = parseInt(btn.dataset.sidxi);
+    btn.onclick = () => window.removeSeller(i);
   });
 }
 
@@ -186,6 +252,25 @@ window.toggleSellerPin = function(i) {
     ? `PIN: ${s.pin}`
     : `PIN: ${"•".repeat(String(s.pin||"").length)}`;
 };
+
+async function paySeller(sellerName) {
+  if (!authedOnly()) return;
+  const now = new Date().toISOString();
+  const sellers = (adminConfig?.sellers || []).map(s => {
+    if (s.name === sellerName) return { ...s, last_paid_at: now };
+    return s;
+  });
+  showConfirm("Pagar comisión",
+    `Marcar a "${sellerName}" como pagado al ${new Date().toLocaleString("es-CL")}. La comisión pendiente se reiniciará a $0.`,
+    async () => {
+      await updateAdminConfig({ sellers });
+      await loadVentas(false);
+      renderSellersInModal();
+      toast(`${sellerName} pagado`);
+    },
+    false
+  );
+}
 
 window.removeSeller = async function(i) {
   if (!authedOnly()) return;
@@ -220,6 +305,21 @@ async function addSellerHandler() {
 // ---
 // DEVICES (inside modal, dual view)
 // ---
+function rebindDeviceActions(container) {
+  container.querySelectorAll(".btn-block").forEach(btn => {
+    const did = btn.closest("[data-did]")?.dataset.did;
+    if (did) btn.onclick = () => showConfirm("Bloquear","¿Bloquear este dispositivo?",()=>updateDeviceStatus(did,"blocked"),true);
+  });
+  container.querySelectorAll(".btn-activate").forEach(btn => {
+    const did = btn.closest("[data-did]")?.dataset.did;
+    if (did) btn.onclick = () => updateDeviceStatus(did,"active");
+  });
+  container.querySelectorAll(".btn-dev-del").forEach(btn => {
+    const did = btn.closest("[data-did]")?.dataset.did;
+    if (did) btn.onclick = () => showConfirm("Eliminar dispositivo","¿Eliminar este dispositivo permanentemente?",()=>deleteDevice(did),true);
+  });
+}
+
 function renderDevicesInModal() {
   const body = $("modal-body");
   if (!body) return;
@@ -244,14 +344,15 @@ function renderDevicesInModal() {
         <td style="font-size:10px;color:var(--t4)">${lastSeen}</td>
         <td>${d.total_scans || 0}</td>
         <td><span class="badge ${statusClass}">${statusLabel}</span></td>
-        <td style="display:flex;gap:4px;flex-wrap:wrap">
+        <td style="display:flex;gap:4px;flex-wrap:wrap" data-did="${escH(d.id)}">
           ${isActive
-            ? `<button class="btn-ghost btn-sm" onclick="showConfirm('Bloquear','¿Bloquear este dispositivo?',function(){ updateDeviceStatus('${d.id}','blocked'); },true)">Bloquear</button>`
-            : `<button class="btn-ghost btn-sm" onclick="updateDeviceStatus('${d.id}','active')">Activar</button>`}
-          <button class="btn-danger btn-sm" onclick="showConfirm('Eliminar dispositivo','¿Eliminar este dispositivo permanentemente?',function(){ deleteDevice('${d.id}'); },true)">Eliminar</button>
+            ? `<button class="btn-ghost btn-sm btn-block">Bloquear</button>`
+            : `<button class="btn-ghost btn-sm btn-activate">Activar</button>`}
+          <button class="btn-danger btn-sm btn-dev-del">Eliminar</button>
         </td>
       </tr>`;
     }).join("");
+    rebindDeviceActions(body);
   }
 
   if (grid) {
@@ -271,14 +372,15 @@ function renderDevicesInModal() {
             <span class="badge ${statusClass}">${statusLabel}</span>
           </div>
         </div>
-        <div class="dev-card-actions">
+        <div class="dev-card-actions" data-did="${escH(d.id)}">
           ${isActive
-            ? `<button class="btn-ghost btn-sm" onclick="showConfirm('Bloquear','¿Bloquear este dispositivo?',function(){ updateDeviceStatus('${d.id}','blocked'); },true)">Bloquear</button>`
-            : `<button class="btn-ghost btn-sm" onclick="updateDeviceStatus('${d.id}','active')">Activar</button>`}
-          <button class="btn-danger btn-sm" onclick="showConfirm('Eliminar','¿Eliminar este dispositivo permanentemente?',function(){ deleteDevice('${d.id}'); },true)">Eliminar</button>
+            ? `<button class="btn-ghost btn-sm btn-block">Bloquear</button>`
+            : `<button class="btn-ghost btn-sm btn-activate">Activar</button>`}
+          <button class="btn-danger btn-sm btn-dev-del">Eliminar</button>
         </div>
       </div>`;
     }).join("");
+    rebindDeviceActions(body);
   }
 }
 
@@ -294,7 +396,7 @@ function renderScanLogInModal() {
   let filtered = [...scanLogs];
   if (slSearch) {
     const q = slSearch;
-    filtered = filtered.filter(l => l.part_id?.includes(q) || l.device_id?.includes(q));
+    filtered = filtered.filter(l => (l.part_id||"").toLowerCase().includes(q) || (l.device_id||"").toLowerCase().includes(q));
   }
   if (slFilter !== "all") filtered = filtered.filter(l => l.resultado === slFilter);
 
@@ -327,7 +429,7 @@ function renderAuditLogInModal() {
   const empty = body.querySelector("#audit-empty");
   if (!tbody) return;
   let filtered = [...auditLogs];
-  if (auditSearch) { const q = auditSearch; filtered = filtered.filter(l => l.part_id?.includes(q)); }
+  if (auditSearch) { const q = auditSearch; filtered = filtered.filter(l => (l.part_id||"").toLowerCase().includes(q)); }
   if (auditFilter !== "all") filtered = filtered.filter(l => l.action === auditFilter);
   const stats = body.querySelector("#audit-stats") || (() => { const s = document.createElement("div"); s.id = "audit-stats"; s.style.cssText = "font-size:10px;color:var(--t4);margin-bottom:6px"; body.querySelector(".tbl-wrap")?.before(s); return s; })();
   if (stats) stats.textContent = auditTotal > 0 ? `${auditLogs.length} cargados de ${auditTotal} totales` : `${auditLogs.length} registros`;
@@ -359,6 +461,7 @@ function renderSalesInModal() {
   const summary = body.querySelector("#sales-summary");
   if (!tbody) return;
   let filtered = [...ventas];
+  if (salesFilter === "seller") filtered = filtered.filter(v => v.vendedor?.trim());
   if (salesSearch) {
     const q = salesSearch.toLowerCase();
     filtered = filtered.filter(v =>
