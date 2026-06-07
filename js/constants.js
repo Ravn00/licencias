@@ -25,7 +25,7 @@ let salesFilter = "all";
 const SALES_PAGE_SIZE = 50;
 
 let confirmCb = null;
-const $ = id => document.getElementById(id);
+
 
 const modalNames = { catalog:"Catálogo", apikeys:"API Keys", sellers:"Vendedores", sales:"Ventas", devices:"Dispositivos", scanlog:"Historial", messages:"Mensajes", maintenance:"Mantenimiento", license:"Licencias", diagnostics:"Diagnóstico", audit:"Auditoría" };
 const modalIcons = { catalog:"[cat]", apikeys:"[key]", sellers:"[sel]", sales:"[sal]", devices:"[dev]", scanlog:"[log]", messages:"[msg]", maintenance:"[mnt]", license:"[lic]", diagnostics:"[diag]", audit:"[aud]" };
@@ -238,24 +238,5 @@ $("conf-ok").onclick = async () => {
 $("conf-cancel").onclick = () => { $("confirm-bg").style.display = "none"; confirmCb = null; };
 
 // ---
-// TOAST
-// ---
-function toast(msg, dur) {
-  const el = $("toast");
-  el.textContent = msg;
-  el.classList.add("on");
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.classList.remove("on"), dur || 2500);
-}
-
-// ---
-// LIGHTBOX
-// ---
-function openLightbox(src) { $("lb-img").src = src; $("lightbox").classList.add("on"); document.addEventListener("keydown", closeLightboxKey); }
-function closeLightbox() { $("lightbox").classList.remove("on"); $("lb-img").src = ""; document.removeEventListener("keydown", closeLightboxKey); }
-function closeLightboxKey(e) { if (e.key === "Escape") closeLightbox(); }
-
-// ---
 // UTILS
 // ---
-function escH(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/\//g,"&#x2F;"); }
