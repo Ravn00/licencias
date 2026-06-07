@@ -76,13 +76,23 @@ async function doLogin() {
   loadAllData();
 }
 
-async function sbFetch(path, method="GET", body=null) {
+function toast(msg) {
+  const el = document.getElementById("toast");
+  if (!el) return;
+  const msgEl = document.getElementById("toast-msg") || el.querySelector(".toast-msg");
+  if (msgEl) msgEl.textContent = msg;
+  el.classList.add("on");
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("on"), 3000);
+}
+
+async function sbFetch(path, method="GET", body=null, showError=true) {
   const opts = { method, headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Content-Type": "application/json" } };
   if (body) opts.body = JSON.stringify(body);
   try {
     const res = await fetch(SB_URL + path, opts);
     if (!res.ok) {
       console.error("sbFetch error:", method, path, res.status);
+      if (showError) toast("Error " + res.status);
       return null;
     }
     if (method === "DELETE" || method === "PATCH") return true;
@@ -91,6 +101,7 @@ async function sbFetch(path, method="GET", body=null) {
     return null;
   } catch(e) {
     console.error("sbFetch error:", e.message);
+    if (showError) toast("Error de red");
     return null;
   }
 }
