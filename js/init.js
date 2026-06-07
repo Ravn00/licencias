@@ -275,10 +275,22 @@ async function paySeller(sellerName) {
 window.removeSeller = async function(i) {
   if (!authedOnly()) return;
   const sellers = adminConfig?.sellers || [];
-  sellers.splice(i, 1);
-  await updateAdminConfig({ sellers });
-  renderSellersInModal();
-  toast("Vendedor eliminado");
+  const s = sellers[i];
+  if (!s) return;
+  const salesCount = (ventas || []).filter(v => v.vendedor === s.name).length;
+  if (salesCount > 0) {
+    showConfirm("Eliminar vendedor",
+      `"${s.name}" tiene ${salesCount} venta(s) en el historial.\nAl eliminar el vendedor, esas ventas quedarán sin asignación.\n\n¿Eliminar de todas formas?`,
+      async () => { sellers.splice(i, 1); await updateAdminConfig({ sellers }); renderSellersInModal(); toast("Vendedor eliminado"); },
+      true
+    );
+  } else {
+    showConfirm("Eliminar vendedor",
+      `¿Eliminar a "${s.name}"?`,
+      async () => { sellers.splice(i, 1); await updateAdminConfig({ sellers }); renderSellersInModal(); toast("Vendedor eliminado"); },
+      true
+    );
+  }
 };
 
 async function addSellerHandler() {
