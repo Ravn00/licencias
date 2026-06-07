@@ -18,6 +18,8 @@
 <link rel="stylesheet" href="css/styles.css"/>
 </head>
 <body>
+<a href="#home" class="skip-link">Ir al contenido principal</a>
+<h1 class="sr-only">A-CAP - Panel de Administración</h1>
 
 <!-- PASSWORD GATE -->
 <div id="pw-gate">
@@ -25,7 +27,7 @@
     <div class="pw-icon">&#9881;</div>
     <div class="pw-title">Panel de Administración</div>
     <div class="pw-sub">Ingresa la contraseña de administrador</div>
-    <input class="pw-input" id="pw-input" type="password" placeholder="Contraseña" autocomplete="off"/>
+    <input class="pw-input" id="pw-input" name="password" type="password" placeholder="Contraseña" autocomplete="off" aria-label="Contraseña de administrador"/>
     <button class="pw-btn" id="pw-btn">Acceder</button>
     <div class="pw-error" id="pw-error"></div>
   </div>
@@ -53,10 +55,12 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           <span>Vendedores</span>
         </button>
+        <div class="snav-sep"></div>
         <button class="snav-item" onclick="openModal('sales')">
           <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <span>Ventas</span>
         </button>
+        <div class="snav-sep"></div>
         <button class="snav-item" onclick="openModal('devices')">
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1h6"/><path d="M9 23h6"/><path d="M12 21v-2"/></svg>
           <span>Dispositivos</span><span class="scnt" id="c-devices">0</span>
@@ -69,6 +73,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           <span>Auditoría</span>
         </button>
+        <div class="snav-sep"></div>
         <button class="snav-item" onclick="openModal('messages')">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           <span>Mensajes</span>
@@ -86,6 +91,7 @@
           <span>Diagnóstico</span>
         </button>
       </div>
+      <div class="snav-sep"></div>
       <div id="sidebar-footer">
         <button id="sidebar-theme" aria-label="Cambiar tema" title="Cambiar tema">
           <svg viewBox="0 0 24 24" id="side-theme-icon" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -194,7 +200,7 @@
 <div id="content-catalog" style="display:none">
   <div class="sec-title">Catálogo de partes</div>
   <div class="sec-sub">Vista general de todas las partes escaneadas desde los dispositivos CAPv2.</div>
-  <input class="search-bar" id="cat-search" placeholder="Buscar por marca, modelo, años…"/>
+  <input class="search-bar" id="cat-search" name="catSearch" placeholder="Buscar por marca, modelo, años…" aria-label="Buscar en catálogo"/>
   <div class="cat-tools">
     <button class="filter-pill on" data-f="all" onclick="setCatFilter('all')">Todas</button>
     <button class="filter-pill" data-f="avail" onclick="setCatFilter('avail')">Disponibles</button>
@@ -219,7 +225,7 @@
     <div id="keys-list"></div>
     <div style="display:flex;gap:6px;margin-top:8px">
       <div style="flex:1;position:relative">
-        <input id="api-key-in" type="password" placeholder="Ingresa nueva API key"
+        <input id="api-key-in" name="apiKey" type="password" placeholder="Ej: gsk_… o sk-or-…" autocomplete="off" spellcheck="false" aria-label="Nueva API key"
           style="width:100%;background:var(--s2);border:1px solid var(--bdr2);color:var(--text);padding:8px 34px 8px 10px;border-radius:var(--r6);font-size:12px"/>
         <button id="api-eye" aria-label="Mostrar u ocultar la API key" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;display:flex;align-items:center;padding:0">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -230,7 +236,7 @@
     <div id="api-status" style="font-size:11px;margin-top:5px;min-height:14px;color:var(--t4)"></div>
     <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr2)">
       <label style="font-size:11px;color:var(--t3);display:block;margin-bottom:4px">Modelo Groq</label>
-      <select id="or-model-sel" style="width:100%;background:var(--s2);border:1px solid var(--bdr2);color:var(--text);padding:7px;border-radius:var(--r6);font-size:12px">
+        <select id="or-model-sel" name="groqModel" aria-label="Modelo Groq" style="width:100%;background:var(--s2);border:1px solid var(--bdr2);color:var(--text);padding:7px;border-radius:var(--r6);font-size:12px">
         <option value="meta-llama/llama-4-scout-17b-16e-instruct">Llama 4 Scout 17B (recomendado)</option>
         <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 4 Maverick 17B</option>
         <option value="llama-3.2-90b-vision-preview">Llama 3.2 90B Vision</option>
@@ -247,7 +253,7 @@
   <div class="sec-card">
     <div id="sellers-list"></div>
     <div style="display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr2)">
-      <div style="flex:1"><input id="sel-name-in" placeholder="Nombre del vendedor" style="width:100%;background:var(--s2);border:1px solid var(--bdr2);color:var(--text);padding:8px 10px;border-radius:var(--r6);font-size:12px;margin-bottom:6px"/><input id="sel-pin-in" type="password" placeholder="PIN (4 dígitos)" maxlength="4" style="width:100%;background:var(--s2);border:1px solid var(--bdr2);color:var(--text);padding:8px 10px;border-radius:var(--r6);font-size:12px"/></div>
+      <div style="flex:1"><input id="sel-name-in" name="sellerName" placeholder="Nombre del vendedor" aria-label="Nombre del vendedor" style="width:100%;background:var(--s2);border:1px solid var(--bdr2);color:var(--text);padding:8px 10px;border-radius:var(--r6);font-size:12px;margin-bottom:6px"/><input id="sel-pin-in" name="sellerPin" type="password" placeholder="PIN (4 dígitos)" maxlength="4" aria-label="PIN del vendedor" style="width:100%;background:var(--s2);border:1px solid var(--bdr2);color:var(--text);padding:8px 10px;border-radius:var(--r6);font-size:12px"/></div>
       <button class="btn-primary btn-sm" id="sel-add" style="align-self:flex-end">+ Agregar</button>
     </div>
     <div id="sel-status" style="font-size:11px;margin-top:5px;min-height:14px;color:var(--t4)"></div>
@@ -259,8 +265,8 @@
   <div class="sec-title">Ventas y Comisiones</div>
   <div class="sec-sub">Registro de todas las ventas realizadas desde la app de vendedores con comisiones del 10%.</div>
   <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
-    <input class="fld-in" id="sales-search" placeholder="Buscar por vendedor o parte…" style="flex:1;min-width:140px"/>
-    <select class="fld-in" id="sales-filter" style="width:auto;min-width:90px">
+    <input class="fld-in" id="sales-search" name="salesSearch" placeholder="Buscar por vendedor o parte…" aria-label="Buscar ventas" style="flex:1;min-width:140px"/>
+    <select class="fld-in" id="sales-filter" name="salesFilter" aria-label="Filtrar ventas" style="width:auto;min-width:90px">
       <option value="all">Todos</option>
       <option value="seller">Por vendedor</option>
     </select>
@@ -299,8 +305,8 @@
   <div class="sec-title">Historial de escaneos</div>
   <div class="sec-sub">Registro de todas las piezas escaneadas desde los dispositivos.</div>
   <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
-    <input class="fld-in" id="sl-search" placeholder="Buscar por ID de parte o dispositivo" style="flex:1;min-width:140px"/>
-    <select class="fld-in" id="sl-filter" style="width:auto;min-width:90px">
+    <input class="fld-in" id="sl-search" name="slSearch" placeholder="Buscar por ID de parte o dispositivo" aria-label="Buscar en historial" style="flex:1;min-width:140px"/>
+    <select class="fld-in" id="sl-filter" name="slFilter" aria-label="Filtrar historial" style="width:auto;min-width:90px">
       <option value="all">Todos</option>
       <option value="success">Exitosos</option>
       <option value="error">Con error</option>
@@ -325,8 +331,8 @@
   <div class="sec-title">Auditoría de cambios</div>
   <div class="sec-sub">Registro de todas las modificaciones hechas al catálogo.</div>
   <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
-    <input class="fld-in" id="audit-search" placeholder="Buscar por ID de parte" style="flex:1;min-width:140px"/>
-    <select class="fld-in" id="audit-filter" style="width:auto;min-width:90px">
+    <input class="fld-in" id="audit-search" name="auditSearch" placeholder="Buscar por ID de parte" aria-label="Buscar en auditoría" style="flex:1;min-width:140px"/>
+    <select class="fld-in" id="audit-filter" name="auditFilter" aria-label="Filtrar auditoría" style="width:auto;min-width:90px">
       <option value="all">Todos</option>
       <option value="create">Creadas</option>
       <option value="update">Editadas</option>
@@ -353,12 +359,12 @@
   <div class="sec-card">
     <div class="fld-group">
       <div class="fld-row">
-        <label>Mensaje</label>
-        <input class="fld-in" id="msg-text" placeholder="Ej: Nueva actualización disponible" maxlength="200"/>
+        <label for="msg-text">Mensaje</label>
+        <input class="fld-in" id="msg-text" name="adminMsg" placeholder="Ej: Nueva actualización disponible" maxlength="200"/>
       </div>
       <div class="fld-row">
-        <label>Tipo</label>
-        <select class="fld-in" id="msg-type" style="width:auto">
+        <label for="msg-type">Tipo</label>
+        <select class="fld-in" id="msg-type" name="msgType" style="width:auto">
           <option value="info">Info (azul)</option>
           <option value="warning">Advertencia (amarillo)</option>
           <option value="critical">Crítico (rojo)</option>
@@ -391,8 +397,8 @@
     </div>
     <div class="fld-group">
       <div class="fld-row">
-        <label>Mensaje</label>
-        <input class="fld-in" id="maint-msg" placeholder="Ej: Sistema en mantenimiento programado" maxlength="200"/>
+        <label for="maint-msg">Mensaje</label>
+        <input class="fld-in" id="maint-msg" name="maintMsg" placeholder="Ej: Sistema en mantenimiento programado" maxlength="200"/>
       </div>
       <div class="fld-row">
         <label></label>
@@ -408,12 +414,12 @@
   <div class="sec-card">
     <div class="fld-group">
       <div class="fld-row">
-        <label>Nueva contraseña</label>
-        <input class="fld-in" id="admin-pw-input" type="password" placeholder="Mínimo 6 caracteres"/>
+        <label for="admin-pw-input">Nueva contraseña</label>
+        <input class="fld-in" id="admin-pw-input" name="newPassword" type="password" placeholder="Mínimo 6 caracteres"/>
       </div>
       <div class="fld-row">
-        <label>Confirmar</label>
-        <input class="fld-in" id="admin-pw-confirm" type="password" placeholder="Repite la contraseña"/>
+        <label for="admin-pw-confirm">Confirmar</label>
+        <input class="fld-in" id="admin-pw-confirm" name="confirmPassword" type="password" placeholder="Repite la contraseña"/>
       </div>
       <div class="fld-row">
         <label></label>
@@ -430,15 +436,15 @@
   <div class="sec-card">
     <div class="fld-group">
       <div class="fld-row">
-        <label>Proveedor IA</label>
-        <select class="fld-in" id="lic-provider" style="width:auto">
+        <label for="lic-provider">Proveedor IA</label>
+        <select class="fld-in" id="lic-provider" name="aiProvider" style="width:auto">
           <option value="groq">Groq</option>
           <option value="openrouter">OpenRouter</option>
         </select>
       </div>
       <div class="fld-row">
-        <label>Modelo IA</label>
-        <input class="fld-in" id="lic-model" placeholder="meta-llama/llama-4-scout-17b-16e-instruct"/>
+        <label for="lic-model">Modelo IA</label>
+        <input class="fld-in" id="lic-model" name="aiModel" placeholder="meta-llama/llama-4-scout-17b-16e-instruct"/>
       </div>
       <div class="fld-row">
         <label></label>
@@ -451,12 +457,12 @@
   <div class="sec-card">
     <div class="fld-group">
       <div class="fld-row">
-        <label>Secret actual</label>
-        <input class="fld-in" id="lic-secret" type="password" placeholder="License secret"/>
+        <label for="lic-secret">Secret actual</label>
+        <input class="fld-in" id="lic-secret" name="licenseSecret" type="password" placeholder="License secret"/>
       </div>
       <div class="fld-row">
-        <label>Nuevo secret</label>
-        <input class="fld-in" id="lic-new-secret" type="password" placeholder="Nuevo valor (opcional)"/>
+        <label for="lic-new-secret">Nuevo secret</label>
+        <input class="fld-in" id="lic-new-secret" name="newLicenseSecret" type="password" placeholder="Nuevo valor (opcional)"/>
       </div>
       <div class="fld-row">
         <label></label>
@@ -469,19 +475,19 @@
   <div class="sec-card">
     <div class="fld-group">
       <div class="fld-row">
-        <label>Cliente</label>
-        <input class="fld-in" id="lic-gen-client" placeholder="Ej: C001" maxlength="10"/>
+        <label for="lic-gen-client">Cliente</label>
+        <input class="fld-in" id="lic-gen-client" name="licClient" placeholder="Ej: C001" maxlength="10"/>
       </div>
       <div class="fld-row">
-        <label>Mes</label>
-        <select class="fld-in" id="lic-gen-month" style="width:auto">
+        <label for="lic-gen-month">Mes</label>
+        <select class="fld-in" id="lic-gen-month" name="licMonth" style="width:auto">
           <option value="1">01</option><option value="2">02</option><option value="3">03</option><option value="4">04</option><option value="5">05</option><option value="6">06</option>
           <option value="7">07</option><option value="8">08</option><option value="9">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
         </select>
       </div>
       <div class="fld-row">
-        <label>Año</label>
-        <select class="fld-in" id="lic-gen-year" style="width:auto">
+        <label for="lic-gen-year">Año</label>
+        <select class="fld-in" id="lic-gen-year" name="licYear" style="width:auto">
           <option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
         </select>
       </div>
@@ -490,9 +496,9 @@
         <button class="btn-primary btn-sm" id="lic-gen-btn">Generar código</button>
       </div>
       <div class="fld-row" id="lic-gen-result" style="display:none">
-        <label style="color:var(--green-lt)">Código</label>
+        <label for="lic-gen-output" style="color:var(--green-lt)">Código</label>
         <div style="flex:1;display:flex;gap:6px;align-items:center">
-          <input class="fld-in" id="lic-gen-output" readonly style="font-family:monospace;letter-spacing:1px;color:var(--gold);font-weight:600"/>
+          <input class="fld-in" id="lic-gen-output" name="licCode" readonly style="font-family:monospace;letter-spacing:1px;color:var(--gold);font-weight:600"/>
           <button class="btn-ghost btn-sm" id="lic-gen-copy" title="Copiar">Copiar</button>
         </div>
       </div>
@@ -517,7 +523,7 @@
 </div>
 
 <!-- MODAL OVERLAY -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)" onkeydown="if(event.key==='Escape')closeModal()" tabindex="0" role="button" aria-label="Cerrar modal">
   <div class="modal-frame" id="modal-frame" onclick="event.stopPropagation()">
     <div class="modal-top">
       <span class="modal-title" id="modal-title"></span>
@@ -540,9 +546,9 @@
 </div>
 
 <!-- LIGHTBOX -->
-<div id="lightbox" onclick="closeLightbox()">
+<div id="lightbox" onclick="closeLightbox()" onkeydown="if(event.key==='Escape')closeLightbox()" tabindex="0" role="button" aria-label="Cerrar imagen ampliada">
   <button id="lb-close" aria-label="Cerrar imagen" onclick="event.stopPropagation();closeLightbox()">&times;</button>
-  <img id="lb-img" src="" alt="" onclick="event.stopPropagation()"/>
+  <img id="lb-img" src="" alt="" width="800" height="600" onclick="event.stopPropagation()"/>
 </div>
 
 <!-- TOAST -->
